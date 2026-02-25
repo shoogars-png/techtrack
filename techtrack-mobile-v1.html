@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1117">
+<title>TechTrack Field</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════ */
+:root {
+  --bg:         #0d1117;
+  --bg2:        #161b22;
+  --bg3:        #1c2330;
+  --surface:    #21262d;
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #e6edf3;
+  --muted:      #8b949e;
+  --accent:     #2bbdc8;
+  --accent2:    #1fa8b3;
+  --green:      #3fb950;
+  --orange:     #e8943a;
+  --red:        #e05252;
+  --purple:     #a371f7;
+
+  --status-waiting:  #e8943a;
+  --status-progress: #2bbdc8;
+  --status-done:     #3fb950;
+  --status-blocked:  #e05252;
+
+  --nav-h: 72px;
+  --header-h: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════
+   SCREENS SYSTEM
+═══════════════════════════════════════ */
+.screen { display: none; width: 100%; height: 100%; position: absolute; inset: 0; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ═══════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════ */
+#screen-login {
+  background: radial-gradient(ellipse 90% 80% at 50% 0%, rgba(43,189,200,0.12) 0%, transparent 60%),
+              linear-gradient(180deg, #0d1117 0%, #0a1520 100%);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  flex-direction: column;
+  gap: 0;
+}
+
+.login-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: .2rem;
+}
+.login-logo span { color: var(--accent); }
+
+.login-sub {
+  font-size: .85rem;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+
+.login-label {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  align-self: flex-start;
+  width: 100%;
+  max-width: 340px;
+}
+
+.tech-grid-login {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 2.5rem;
+}
+
+.tech-btn {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 1.3rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.tech-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tech-color);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.tech-btn:active::before { opacity: .1; }
+.tech-btn.selected {
+  border-color: var(--tech-color);
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 0 0 1px var(--tech-color), 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.tech-btn-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid var(--tech-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--tech-color);
+  transition: all .2s;
+}
+.tech-btn.selected .tech-btn-avatar {
+  background: var(--tech-color);
+  color: #0d1117;
+}
+
+.tech-btn-name {
+  font-family: 'Syne', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.tech-btn-role {
+  font-size: .68rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.login-enter {
+  width: 100%;
+  max-width: 340px;
+  padding: 1.1rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 14px;
+  color: #0d1117;
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: all .2s;
+  box-shadow: 0 4px 20px rgba(43,189,200,0.4);
+}
+.login-enter:disabled {
+  background: var(--surface);
+  color: var(--muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.login-enter:not(:disabled):active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(43,189,200,0.3);
+}
+
+/* ═══════════════════════════════════════
+   MAIN APP LAYOUT
+═══════════════════════════════════════ */
+#screen-app {
+  background: var(--bg);
+}
+
+/* HEADER */
+.app-header {
+  height: var(--header-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.header-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.header-logo span { color: var(--accent); }
+
+.header-tech {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: .35rem .9rem .35rem .5rem;
+}
+.header-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: .72rem;
+  font-weight: 800;
+  color: #0d1117;
+}
+.header-techname {
+  font-family: 'Syne', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.header-sync {
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.header-sync:active { transform: scale(0.9); }
+.header-sync.syncing { animation: spin .7s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* CONTENT AREA */
+.app-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-pane {
+  display: none;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 1rem calc(var(--nav-h) + 1rem);
+  -webkit-overflow-scrolling: touch;
+}
+.tab-pane.active { display: block; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-h);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 .5rem;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 10;
+  backdrop-filter: blur(20px);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  padding: .6rem .2rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all .2s;
+  border: none;
+  background: transparent;
+  position: relative;
+}
+.nav-btn:active { transform: scale(0.92); }
+.nav-icon {
+  font-size: 1.4rem;
+  transition: all .2s;
+  line-height: 1;
+}
+.nav-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .65rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .02em;
+  transition: all .2s;
+}
+.nav-btn.active .nav-label { color: var(--accent); }
+.nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px rgba(43,189,200,0.6)); }
+
+.nav-badge {
+  position: absolute;
+  top: .4rem;
+  right: calc(50% - 1rem);
+  background: var(--red);
+  color: #fff;
+  font-size: .58rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 .3rem;
+}
+
+/* ═══════════════════════════════════════
+   TAB: MISSIONS
+═══════════════════════════════════════ */
+.tab-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: .3rem;
+}
+.tab-sub {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+
+/* Stats mini */
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+  margin-bottom: 1.25rem;
+}
+.mini-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: .9rem .6rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.mini-stat::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--stat-color);
+}
+.mini-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--stat-color);
+}
+.mini-stat-lbl {
+  font-size: .62rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-top: .25rem;
+}
+
+/* Mission Card */
+.mission-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--status-color);
+  border-radius: 16px;
+  padding: 1.1rem 1.1rem .9rem;
+  margin-bottom: .85rem;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp .3s ease both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mc-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .75rem;
+}
+
+.mc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  flex: 1;
+}
+
+.mc-id {
+  font-size: .65rem;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  background: rgba(43,189,200,.15);
+  color: var(--accent);
+  padding: .2rem .55rem;
+  border-radius: 6px;
+  letter-spacing: .06em;
+  flex-shrink: 0;
+}
+
+.mc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: .9rem;
+}
+
+.chip {
+  font-size: .7rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: .2rem .6rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+.chip.prio-high   { color: var(--red);    background: rgba(224,82,82,.1);  border-color: rgba(224,82,82,.2); }
+.chip.prio-normal { color: var(--accent); background: rgba(43,189,200,.1); border-color: rgba(43,189,200,.2); }
+.chip.prio-low    { color: var(--green);  background: rgba(63,185,80,.1);  border-color: rgba(63,185,80,.2); }
+
+/* Progress */
+.mc-progress {
+  margin-bottom: .9rem;
+}
+.mc-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: .4rem;
+}
+.mc-progress-lbl { font-size: .72rem; font-weight: 600; color: var(--muted); }
+.mc-progress-pct {
+  font-family: 'Syne', sans-serif;
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--status-color);
+}
+.mc-bar-track {
+  height: 8px;
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: .5rem;
+}
+.mc-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--status-color);
+  transition: width .4s ease;
+}
+.mc-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.mc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--status-color);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  border: 3px solid var(--bg);
+}
+.mc-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--surface);
+  border-radius: 999px;
+}
+
+/* Status select */
+.mc-status-select {
+  width: 100%;
+  padding: .7rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: .8rem;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* Actions */
+.mc-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+}
+
+.mc-btn {
+  padding: .75rem;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  transition: all .15s;
+}
+.mc-btn:active { transform: scale(0.96); }
+.mc-btn-edit { background: rgba(232,148,58,.15); color: var(--orange); border: 1px solid rgba(232,148,58,.25); }
+.mc-btn-close { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.25); }
+.mc-btn-full { grid-column: 1 / -1; }
+.mc-btn-danger { background: rgba(224,82,82,.15); color: var(--red); border: 1px solid rgba(224,82,82,.25); }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--muted);
+}
+.empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: .4; }
+.empty-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .5rem;
+}
+.empty-sub { font-size: .85rem; line-height: 1.5; }
+
+/* ═══════════════════════════════════════
+   TAB: CREATE
+═══════════════════════════════════════ */
+.form-section-title {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .65rem;
+  margin-top: 1.25rem;
+}
+.form-section-title:first-child { margin-top: 0; }
+
+.form-group {
+  margin-bottom: .85rem;
+}
+.form-label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+  display: block;
+  margin-bottom: .4rem;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: .85rem 1rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 400;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+  outline: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  background: rgba(43,189,200,.04);
+}
+.form-input::placeholder { color: rgba(139,148,158,.5); }
+.form-textarea { resize: none; height: 90px; line-height: 1.5; }
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+.form-select option { background: var(--bg2); }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .65rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1.1rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 14px;
+  color: #0d1117;
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all .2s;
+  box-shadow: 0 4px 20px rgba(43,189,200,.35);
+  letter-spacing: .02em;
+}
+.submit-btn:active { transform: scale(0.98); }
+
+.edit-cancel-btn {
+  width: 100%;
+  padding: .9rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: 14px;
+  color: var(--muted);
+  font-family: 'Syne', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: .65rem;
+  transition: all .2s;
+}
+.edit-cancel-btn:active { transform: scale(0.98); }
+
+/* edit mode banner */
+.edit-banner {
+  display: none;
+  background: rgba(232,148,58,.12);
+  border: 1px solid rgba(232,148,58,.3);
+  border-radius: 12px;
+  padding: .75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: .82rem;
+  color: var(--orange);
+  font-weight: 600;
+  align-items: center;
+  gap: .5rem;
+}
+.edit-banner.visible { display: flex; }
+
+/* ═══════════════════════════════════════
+   TAB: HISTORY
+═══════════════════════════════════════ */
+.history-filter {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: .25rem;
+  -webkit-overflow-scrolling: touch;
+}
+.history-filter::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  padding: .45rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.filter-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d1117;
+}
+
+.history-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: .7rem;
+  animation: slideUp .3s ease both;
+}
+.hc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.hc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+.hc-status {
+  font-size: .68rem;
+  font-weight: 700;
+  padding: .2rem .6rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.hc-meta {
+  font-size: .75rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+.hc-pct {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+/* ═══════════════════════════════════════
+   TAB: SETTINGS
+═══════════════════════════════════════ */
+.settings-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.settings-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(224,82,82,.12);
+  border: 1.5px solid rgba(224,82,82,.3);
+  border-radius: 14px;
+  color: var(--red);
+  font-family: 'Syne', sans-serif;
+  font-size: .95rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all .2s;
+}
+.logout-btn:active { transform: scale(0.98); }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.info-key { font-size: .8rem; color: var(--muted); font-weight: 500; }
+.info-val { font-size: .8rem; color: var(--text); font-weight: 600; font-family: 'Syne', sans-serif; }
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast-wrap {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  pointer-events: none;
+  width: calc(100% - 2rem);
+  max-width: 340px;
+}
+.toast {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  animation: toastIn .3s ease;
+}
+.toast.success { border-color: rgba(63,185,80,.4); color: var(--green); }
+.toast.error   { border-color: rgba(224,82,82,.4); color: var(--red); }
+.toast.info    { border-color: rgba(43,189,200,.4); color: var(--accent); }
+.toast.out     { animation: toastOut .3s ease forwards; }
+
+@keyframes toastIn  { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { to   { opacity:0; transform:translateY(-8px); } }
+
+/* ═══════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════ */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,17,23,.85);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+.loading-overlay.active { display: flex; }
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--surface);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.loading-text {
+  font-family: 'Syne', sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .05em;
+}
+
+/* ═══════════════════════════════════════
+   STATUS COLORS UTILITIES
+═══════════════════════════════════════ */
+.s-waiting  { --status-color: var(--status-waiting);  }
+.s-progress { --status-color: var(--status-progress); }
+.s-done     { --status-color: var(--status-done);     }
+.s-blocked  { --status-color: var(--status-blocked);  }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div class="screen active" id="screen-login">
+  <div class="login-logo">Tech<span>Track</span></div>
+  <div class="login-sub">Field App — Technicien</div>
+
+  <div class="login-label">Qui êtes-vous ?</div>
+  <div class="tech-grid-login" id="loginGrid"></div>
+
+  <button class="login-enter" id="loginBtn" disabled onclick="doLogin()">
+    Accéder à mes missions →
+  </button>
+</div>
+
+<!-- ══ APP SCREEN ══ -->
+<div class="screen" id="screen-app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-logo">Tech<span>Track</span></div>
+    <div class="header-tech" id="headerTech">
+      <div class="header-avatar" id="headerAvatar"></div>
+      <span class="header-techname" id="headerName"></span>
+    </div>
+    <button class="header-sync" id="syncBtn" onclick="syncData()" title="Synchroniser">🔄</button>
+  </header>
+
+  <!-- Content -->
+  <div class="app-content">
+
+    <!-- TAB: Missions -->
+    <div class="tab-pane active" id="tab-missions">
+      <div class="tab-title">Mes missions</div>
+      <div class="tab-sub" id="missionsSub">Chargement...</div>
+
+      <!-- Mini stats -->
+      <div class="mini-stats">
+        <div class="mini-stat" style="--stat-color:var(--status-progress)">
+          <div class="mini-stat-val" id="stat-active">0</div>
+          <div class="mini-stat-lbl">En cours</div>
+        </div>
+        <div class="mini-stat" style="--stat-color:var(--status-blocked)">
+          <div class="mini-stat-val" id="stat-blocked">0</div>
+          <div class="mini-stat-lbl">Bloqué</div>
+        </div>
+        <div class="mini-stat" style="--stat-color:var(--status-done)">
+          <div class="mini-stat-val" id="stat-done">0</div>
+          <div class="mini-stat-lbl">Terminé</div>
+        </div>
+      </div>
+
+      <div id="missionsList"></div>
+    </div>
+
+    <!-- TAB: Create -->
+    <div class="tab-pane" id="tab-create">
+      <div class="edit-banner" id="editBanner">
+        ✏️ Modification d'une mission
+      </div>
+
+      <div class="tab-title" id="createTitle">Nouvelle mission</div>
+      <div class="tab-sub">Assignée à <span id="createTechName" style="color:var(--accent);font-weight:700"></span></div>
+
+      <div class="form-section-title">Informations principales</div>
+
+      <div class="form-group">
+        <label class="form-label">Intitulé *</label>
+        <input class="form-input" id="f_title" placeholder="Ex: Réparation climatiseur salle A" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lieu / Site</label>
+        <input class="form-input" id="f_site" placeholder="Ex: Bâtiment B - 3ème étage" autocomplete="off">
+      </div>
+
+      <div class="form-section-title">Planification</div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="f_date" type="date">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Début</label>
+          <input class="form-input" id="f_start" type="time">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fin prévue</label>
+          <input class="form-input" id="f_end" type="time">
+        </div>
+      </div>
+
+      <div class="form-section-title">Détails</div>
+      <div class="form-group">
+        <label class="form-label">Priorité</label>
+        <select class="form-select" id="f_priority">
+          <option value="Haute">🔴 Haute</option>
+          <option value="Normale" selected>🔵 Normale</option>
+          <option value="Basse">🟢 Basse</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Commentaire</label>
+        <textarea class="form-textarea" id="f_comment" placeholder="Remarques, observations..."></textarea>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="saveMission()">✅ Assigner la mission</button>
+      <button class="edit-cancel-btn" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">✕ Annuler la modification</button>
+    </div>
+
+    <!-- TAB: History -->
+    <div class="tab-pane" id="tab-history">
+      <div class="tab-title">Historique</div>
+      <div class="tab-sub">Toutes mes missions clôturées</div>
+
+      <div class="history-filter" id="historyFilter">
+        <button class="filter-chip active" data-filter="all" onclick="filterHistory(this, 'all')">Toutes</button>
+        <button class="filter-chip" data-filter="done" onclick="filterHistory(this, 'done')">✅ Terminées</button>
+        <button class="filter-chip" data-filter="blocked" onclick="filterHistory(this, 'blocked')">⚠️ Bloquées</button>
+        <button class="filter-chip" data-filter="progress" onclick="filterHistory(this, 'progress')">🔧 En cours</button>
+      </div>
+
+      <div id="historyList"></div>
+    </div>
+
+    <!-- TAB: Settings -->
+    <div class="tab-pane" id="tab-settings">
+      <div class="tab-title">Paramètres</div>
+      <div class="tab-sub">Configuration de la connexion</div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">🔗 Google Sheets</div>
+        <div class="form-group">
+          <label class="form-label">Apps Script URL</label>
+          <input class="form-input" id="s_sheetUrl" placeholder="https://script.google.com/..." autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <button class="submit-btn" style="margin-top:.5rem" onclick="saveSettings()">💾 Sauvegarder</button>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">👤 Session</div>
+        <div class="info-row">
+          <span class="info-key">Connecté en tant que</span>
+          <span class="info-val" id="s_techName">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Dernière sync</span>
+          <span class="info-val" id="s_lastSync">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Missions actives</span>
+          <span class="info-val" id="s_activeCnt">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Historique</span>
+          <span class="info-val" id="s_historyCnt">—</span>
+        </div>
+      </div>
+
+      <div class="settings-card" style="border-color:rgba(43,189,200,.2)">
+        <div class="settings-card-title">📋 Code Apps Script requis</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.75rem">
+          Copiez ce code dans votre Apps Script Google pour activer la lecture et l'écriture depuis l'app mobile.
+        </div>
+        <button onclick="toggleCode()" style="font-size:.78rem;font-weight:600;padding:.5rem 1rem;background:rgba(43,189,200,.15);color:var(--accent);border:1px solid rgba(43,189,200,.3);border-radius:8px;cursor:pointer">📋 Afficher le code</button>
+        <div id="codeBlock" style="display:none;margin-top:.75rem">
+          <pre id="codeText" style="background:var(--surface);border-radius:10px;padding:1rem;font-size:.68rem;color:#e2e8f0;white-space:pre-wrap;line-height:1.6;overflow-x:auto;border:1px solid var(--border)">// Collez dans votre Apps Script existant
+// (en plus de la fonction doPost existante)
+
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data  = sheet.getDataRange().getValues();
+  const cb    = e && e.parameter && e.parameter.callback;
+  const json  = JSON.stringify({ data: data });
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+          <button onclick="navigator.clipboard.writeText(document.getElementById('codeText').innerText).then(()=>toast('✅ Code copié !','success'))" style="font-size:.75rem;font-weight:600;padding:.4rem .9rem;background:var(--accent);color:#0d1117;border:none;border-radius:7px;cursor:pointer;margin-top:.5rem">📋 Copier</button>
+        </div>
+      </div>
+
+      <button class="logout-btn" onclick="logout()">⬅ Changer de technicien</button>
+    </div>
+
+  </div><!-- /app-content -->
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-missions" onclick="switchTab('missions')">
+      <span class="nav-icon">🔧</span>
+      <span class="nav-label">Missions</span>
+      <span class="nav-badge" id="nav-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-btn" id="nav-create" onclick="switchTab('create')">
+      <span class="nav-icon">➕</span>
+      <span class="nav-label">Créer</span>
+    </button>
+    <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Historique</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Réglages</span>
+    </button>
+  </nav>
+
+</div><!-- /screen-app -->
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loading-text" id="loadingText">Synchronisation...</div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS & CONFIG
+═══════════════════════════════════════════════════════ */
+const TECHS = [
+  { id:'Tech1', label:'Tech 1', initials:'T1', color:'#e05252' },
+  { id:'Tech2', label:'Tech 2', initials:'T2', color:'#2bbdc8' },
+  { id:'Tech3', label:'Tech 3', initials:'T3', color:'#e8943a' },
+  { id:'Tech4', label:'Tech 4', initials:'T4', color:'#a371f7' },
+];
+
+const STATUS_META = {
+  waiting:  { label:'⏳ En attente', short:'En attente', color:'#e8943a', bg:'rgba(232,148,58,.12)',  border:'rgba(232,148,58,.25)'  },
+  progress: { label:'🔧 En cours',   short:'En cours',   color:'#2bbdc8', bg:'rgba(43,189,200,.12)',  border:'rgba(43,189,200,.25)'  },
+  done:     { label:'✅ Terminé',    short:'Terminé',    color:'#3fb950', bg:'rgba(63,185,80,.12)',   border:'rgba(63,185,80,.25)'   },
+  blocked:  { label:'⚠️ Bloqué',    short:'Bloqué',     color:'#e05252', bg:'rgba(224,82,82,.12)',   border:'rgba(224,82,82,.25)'   },
+};
+
+const PRIO_CLASS = { Haute:'prio-high', Normale:'prio-normal', Basse:'prio-low' };
+const PRIO_ICON  = { Haute:'🔴', Normale:'🔵', Basse:'🟢' };
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let currentTech   = null;   // tech object
+let appState      = { missions: [], history: [] };
+let editingId     = null;
+let historyFilter = 'all';
+let pctTimers     = {};
+let lastSync      = null;
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2,5);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PERSISTENCE (localStorage)
+═══════════════════════════════════════════════════════ */
+function getStorageKey() {
+  return currentTech ? `ttm_state_${currentTech.id}` : null;
+}
+function saveLocal() {
+  const key = getStorageKey();
+  if (!key) return;
+  const today = new Date().toDateString();
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  // Keep history across days, reset active missions
+  localStorage.setItem(key, JSON.stringify({
+    missions: appState.missions,
+    history:  appState.history,
+    date:     today,
+    lastSync: lastSync
+  }));
+}
+function loadLocal() {
+  const key = getStorageKey();
+  if (!key) return;
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  const today = new Date().toDateString();
+  if (saved.date !== today) {
+    // New day — reset active missions but keep history
+    appState.missions = [];
+    appState.history  = saved.history || [];
+  } else {
+    appState.missions = saved.missions || [];
+    appState.history  = saved.history  || [];
+    lastSync          = saved.lastSync  || null;
+  }
+}
+
+function getSettings() {
+  return JSON.parse(localStorage.getItem('ttm_settings') || '{}');
+}
+function saveSettings() {
+  const url = document.getElementById('s_sheetUrl').value.trim();
+  const s = { ...getSettings(), sheetUrl: url };
+  localStorage.setItem('ttm_settings', JSON.stringify(s));
+  toast('💾 Paramètres sauvegardés', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════════════════ */
+let selectedTechId = null;
+
+function buildLoginGrid() {
+  const grid = document.getElementById('loginGrid');
+  grid.innerHTML = TECHS.map(t => `
+    <div class="tech-btn" style="--tech-color:${t.color}" id="tbtn_${t.id}" onclick="selectTech('${t.id}')">
+      <div class="tech-btn-avatar">${t.initials}</div>
+      <div class="tech-btn-name">${t.label}</div>
+    </div>
+  `).join('');
+}
+
+function selectTech(id) {
+  selectedTechId = id;
+  document.querySelectorAll('.tech-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`tbtn_${id}`).classList.add('selected');
+  document.getElementById('loginBtn').disabled = false;
+}
+
+function doLogin() {
+  if (!selectedTechId) return;
+  currentTech = TECHS.find(t => t.id === selectedTechId);
+  localStorage.setItem('ttm_current_tech', currentTech.id);
+  loadLocal();
+  initApp();
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  syncData();
+}
+
+function logout() {
+  localStorage.removeItem('ttm_current_tech');
+  currentTech   = null;
+  appState      = { missions: [], history: [] };
+  editingId     = null;
+  selectedTechId = null;
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.querySelectorAll('.tech-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('loginBtn').disabled = true;
+  switchTab('missions');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT APP
+═══════════════════════════════════════════════════════ */
+function initApp() {
+  const t = currentTech;
+  // Header
+  const av = document.getElementById('headerAvatar');
+  av.textContent  = t.initials;
+  av.style.background = t.color;
+  document.getElementById('headerName').textContent = t.label;
+  // Create tab sub
+  document.getElementById('createTechName').textContent = t.label;
+  // Settings
+  document.getElementById('s_techName').textContent = t.label;
+  document.getElementById('s_sheetUrl').value = getSettings().sheetUrl || '';
+  // Render
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+  if (name === 'create' && !editingId) {
+    resetCreateForm();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER MISSIONS
+═══════════════════════════════════════════════════════ */
+function renderAll() {
+  renderMissions();
+  renderHistory();
+  updateStats();
+  updateSettingsInfo();
+}
+
+function renderMissions() {
+  const list  = document.getElementById('missionsList');
+  const sub   = document.getElementById('missionsSub');
+  const items = appState.missions;
+  const today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+
+  sub.textContent = today.charAt(0).toUpperCase() + today.slice(1);
+
+  if (!items.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🛠️</div>
+        <div class="empty-title">Aucune mission active</div>
+        <div class="empty-sub">Appuyez sur <strong>➕ Créer</strong> pour ajouter une nouvelle mission.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = items.map((m, i) => {
+    const sm   = STATUS_META[m.status] || STATUS_META.waiting;
+    const prioC = PRIO_CLASS[m.priority] || 'prio-normal';
+
+    return `
+    <div class="mission-card s-${m.status}" style="--status-color:${sm.color}" id="mc_${m.id}">
+      <div class="mc-top">
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-id">#${m.id.slice(-6).toUpperCase()}</div>
+      </div>
+      <div class="mc-chips">
+        ${m.missionDate ? `<span class="chip">📅 ${fmtDate(m.missionDate)}</span>` : ''}
+        ${m.site ? `<span class="chip">📍 ${m.site}</span>` : ''}
+        ${m.start ? `<span class="chip">🕐 ${m.start}${m.end ? '→'+m.end : ''}</span>` : ''}
+        <span class="chip ${prioC}">${PRIO_ICON[m.priority]} ${m.priority}</span>
+        <span class="chip" style="background:${sm.bg};border-color:${sm.border};color:${sm.color}">${sm.short}</span>
+      </div>
+      ${m.comment ? `<div style="font-size:.75rem;color:var(--muted);background:var(--surface);padding:.45rem .75rem;border-radius:8px;margin-bottom:.75rem;line-height:1.5">💬 ${m.comment}</div>` : ''}
+
+      <div class="mc-progress">
+        <div class="mc-progress-row">
+          <span class="mc-progress-lbl">Avancement</span>
+          <span class="mc-progress-pct" id="pct_${m.id}">${m.pct}%</span>
+        </div>
+        <div class="mc-bar-track">
+          <div class="mc-bar-fill" id="bar_${m.id}" style="width:${m.pct}%;background:${sm.color}"></div>
+        </div>
+        <input type="range" class="mc-slider" min="0" max="100" value="${m.pct}"
+          oninput="onPctChange('${m.id}', this.value)">
+      </div>
+
+      <select class="mc-status-select" onchange="onStatusChange('${m.id}', this.value)">
+        ${Object.entries(STATUS_META).map(([k,v]) =>
+          `<option value="${k}" ${m.status===k?'selected':''}>${v.label}</option>`
+        ).join('')}
+      </select>
+
+      <div class="mc-actions">
+        <button class="mc-btn mc-btn-edit" onclick="startEdit('${m.id}')">✏️ Modifier</button>
+        <button class="mc-btn mc-btn-close" onclick="closeMission('${m.id}')">🏁 Terminer</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Badge
+  const badge = document.getElementById('nav-badge');
+  badge.textContent = items.length;
+  badge.style.display = items.length ? 'flex' : 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER HISTORY
+═══════════════════════════════════════════════════════ */
+function renderHistory() {
+  const list   = document.getElementById('historyList');
+  let filtered = appState.history;
+  if (historyFilter !== 'all') filtered = filtered.filter(h => h.status === historyFilter);
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Aucune mission archivée</div>
+        <div class="empty-sub">L'historique de vos missions clôturées apparaîtra ici.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = [...filtered].reverse().map(h => {
+    const sm = STATUS_META[h.status] || STATUS_META.done;
+    return `
+    <div class="history-card">
+      <div class="hc-top">
+        <div class="hc-title">${h.title}</div>
+        <div class="hc-status" style="background:${sm.bg};color:${sm.color};border:1px solid ${sm.border}">
+          ${sm.short}
+        </div>
+      </div>
+      <div class="hc-meta">
+        ${h.missionDate ? `<span>📅 ${fmtDate(h.missionDate)}</span>` : ''}
+        ${h.site ? `<span>📍 ${h.site}</span>` : ''}
+        ${h.completedAt ? `<span>🕐 ${h.completedAt}</span>` : ''}
+        <span class="hc-pct" style="color:${sm.color}">${h.pct}%</span>
+        <span style="background:var(--surface);font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:5px;color:var(--muted)">#${h.id.slice(-6).toUpperCase()}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterHistory(el, f) {
+  historyFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderHistory();
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════ */
+function updateStats() {
+  const m = appState.missions;
+  document.getElementById('stat-active').textContent  = m.filter(x=>x.status==='progress').length;
+  document.getElementById('stat-blocked').textContent = m.filter(x=>x.status==='blocked').length;
+  document.getElementById('stat-done').textContent    = appState.history.filter(x=>x.status==='done').length;
+}
+
+function updateSettingsInfo() {
+  document.getElementById('s_activeCnt').textContent  = appState.missions.length;
+  document.getElementById('s_historyCnt').textContent = appState.history.length;
+  document.getElementById('s_lastSync').textContent   = lastSync || '—';
+}
+
+/* ═══════════════════════════════════════════════════════
+   CREATE / EDIT MISSION
+═══════════════════════════════════════════════════════ */
+function resetCreateForm() {
+  editingId = null;
+  document.getElementById('createTitle').textContent = 'Nouvelle mission';
+  document.getElementById('editBanner').classList.remove('visible');
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('submitBtn').textContent = '✅ Assigner la mission';
+  document.getElementById('f_title').value    = '';
+  document.getElementById('f_site').value     = '';
+  document.getElementById('f_date').value     = new Date().toISOString().split('T')[0];
+  document.getElementById('f_start').value    = '';
+  document.getElementById('f_end').value      = '';
+  document.getElementById('f_priority').value = 'Normale';
+  document.getElementById('f_comment').value  = '';
+}
+
+function startEdit(id) {
+  const m = appState.missions.find(x => x.id === id);
+  if (!m) return;
+  editingId = id;
+  document.getElementById('createTitle').textContent = 'Modifier la mission';
+  document.getElementById('editBanner').classList.add('visible');
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('submitBtn').textContent = '💾 Enregistrer les modifications';
+  document.getElementById('f_title').value    = m.title   || '';
+  document.getElementById('f_site').value     = m.site    || '';
+  document.getElementById('f_date').value     = m.missionDate || new Date().toISOString().split('T')[0];
+  document.getElementById('f_start').value    = m.start   || '';
+  document.getElementById('f_end').value      = m.end     || '';
+  document.getElementById('f_priority').value = m.priority|| 'Normale';
+  document.getElementById('f_comment').value  = m.comment || '';
+  switchTab('create');
+  window.scrollTo(0,0);
+  document.getElementById('tab-create').scrollTop = 0;
+}
+
+function cancelEdit() {
+  resetCreateForm();
+  switchTab('missions');
+}
+
+function saveMission() {
+  const title = document.getElementById('f_title').value.trim();
+  if (!title) { toast('⚠️ Intitulé requis', 'error'); return; }
+
+  if (editingId) {
+    // Edit
+    const idx = appState.missions.findIndex(x => x.id === editingId);
+    if (idx >= 0) {
+      appState.missions[idx] = {
+        ...appState.missions[idx],
+        title,
+        site:        document.getElementById('f_site').value.trim(),
+        missionDate: document.getElementById('f_date').value,
+        start:       document.getElementById('f_start').value,
+        end:         document.getElementById('f_end').value,
+        priority:    document.getElementById('f_priority').value,
+        comment:     document.getElementById('f_comment').value.trim(),
+      };
+      saveLocal();
+      renderAll();
+      syncMissionToSheets(appState.missions[idx]);
+      toast('✏️ Mission modifiée', 'success');
+    }
+    resetCreateForm();
+    switchTab('missions');
+  } else {
+    // New
+    const m = {
+      id:          genId(),
+      title,
+      site:        document.getElementById('f_site').value.trim(),
+      missionDate: document.getElementById('f_date').value,
+      start:       document.getElementById('f_start').value,
+      end:         document.getElementById('f_end').value,
+      priority:    document.getElementById('f_priority').value,
+      comment:     document.getElementById('f_comment').value.trim(),
+      status:      'waiting',
+      pct:         0,
+    };
+    appState.missions.push(m);
+    saveLocal();
+    renderAll();
+    syncMissionToSheets(m);
+    toast('✅ Mission créée', 'success');
+    resetCreateForm();
+    switchTab('missions');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   UPDATE PCT / STATUS
+═══════════════════════════════════════════════════════ */
+function onPctChange(id, val) {
+  const m = appState.missions.find(x => x.id === id);
+  if (!m) return;
+  m.pct = parseInt(val);
+  const sm = STATUS_META[m.status] || STATUS_META.waiting;
+  const pctEl = document.getElementById(`pct_${id}`);
+  const barEl = document.getElementById(`bar_${id}`);
+  if (pctEl) pctEl.textContent = m.pct + '%';
+  if (barEl) { barEl.style.width = m.pct + '%'; barEl.style.background = sm.color; }
+  saveLocal();
+  clearTimeout(pctTimers[id]);
+  pctTimers[id] = setTimeout(() => syncMissionToSheets(m), 1500);
+}
+
+function onStatusChange(id, val) {
+  const m = appState.missions.find(x => x.id === id);
+  if (!m) return;
+  m.status = val;
+  if (val === 'done') m.pct = 100;
+  saveLocal();
+  renderAll();
+  syncMissionToSheets(m);
+  toast(`${STATUS_META[val]?.label || val} mis à jour`, 'info');
+}
+
+function closeMission(id) {
+  const idx = appState.missions.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const m = appState.missions[idx];
+  const archived = {
+    ...m,
+    tech: currentTech.id,
+    completedAt: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
+  };
+  appState.history.push(archived);
+  appState.missions.splice(idx, 1);
+  saveLocal();
+  renderAll();
+  syncMissionToSheets({ ...archived, closed: true });
+  toast(`🏁 Mission clôturée`, 'success');
+}
+
+/* ═══════════════════════════════════════════════════════
+   GOOGLE SHEETS SYNC
+═══════════════════════════════════════════════════════ */
+async function syncMissionToSheets(mission) {
+  const url = getSettings().sheetUrl;
+  if (!url) return;
+  try {
+    const payload = {
+      missionId: mission.id,
+      date:      mission.missionDate ? fmtDate(mission.missionDate) : new Date().toLocaleDateString('fr-FR'),
+      tech:      currentTech.id,
+      title:     mission.title    || '',
+      site:      mission.site     || '',
+      priority:  mission.priority || '',
+      status:    mission.status   || '',
+      pct:       mission.pct      || 0,
+      comment:   mission.comment  || '',
+      timestamp: new Date().toISOString(),
+      source:    'mobile'
+    };
+    await fetch(url, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify(payload)
+    });
+  } catch(e) { console.warn('Sync failed', e); }
+}
+
+async function syncData() {
+  const url = getSettings().sheetUrl;
+  if (!url) {
+    toast('⚠️ URL Apps Script non configurée', 'error');
+    switchTab('settings');
+    return;
+  }
+
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('syncing');
+  showLoading('Synchronisation avec Sheets...');
+
+  try {
+    // JSONP fallback for CORS
+    const data = await fetchSheets(url);
+    if (data && data.data) {
+      mergeSheetData(data.data);
+      lastSync = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+      saveLocal();
+      renderAll();
+      toast('✅ Données synchronisées', 'success');
+    }
+  } catch(e) {
+    console.warn('Sync error', e);
+    toast('❌ Impossible de lire Sheets — données locales utilisées', 'error');
+  } finally {
+    btn.classList.remove('syncing');
+    hideLoading();
+  }
+}
+
+function fetchSheets(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'ttcb_' + Date.now();
+    const script = document.createElement('script');
+    const timer  = setTimeout(() => {
+      delete window[cbName];
+      script.remove();
+      reject(new Error('Timeout'));
+    }, 8000);
+    window[cbName] = (data) => {
+      clearTimeout(timer);
+      delete window[cbName];
+      script.remove();
+      resolve(data);
+    };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
+    script.onerror = () => { clearTimeout(timer); delete window[cbName]; reject(new Error('Script error')); };
+    document.body.appendChild(script);
+  });
+}
+
+function mergeSheetData(rows) {
+  if (!rows || rows.length < 2) return;
+  const headers = rows[0].map(h => String(h).trim().toLowerCase());
+  const idIdx     = headers.findIndex(h => h.includes('missionid') || h.includes('id'));
+  const techIdx   = headers.findIndex(h => h.includes('tech'));
+  const titleIdx  = headers.findIndex(h => h.includes('title') || h.includes('mission') || h.includes('intitulé'));
+  const siteIdx   = headers.findIndex(h => h.includes('site') || h.includes('lieu'));
+  const statusIdx = headers.findIndex(h => h.includes('status') || h.includes('statut'));
+  const pctIdx    = headers.findIndex(h => h.includes('pct') || h.includes('%') || h.includes('avancement'));
+  const dateIdx   = headers.findIndex(h => h.includes('date'));
+  const prioIdx   = headers.findIndex(h => h.includes('prio'));
+  const commentIdx = headers.findIndex(h => h.includes('comment'));
+
+  // Get missions from sheet assigned to this tech
+  const sheetMissions = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row  = rows[i];
+    const tech = techIdx >= 0 ? String(row[techIdx] || '').trim() : '';
+    if (tech !== currentTech.id) continue;
+    const id     = idIdx >= 0 ? String(row[idIdx] || '').trim() : '';
+    if (!id) continue;
+    const status = statusIdx >= 0 ? String(row[statusIdx] || 'waiting').trim() : 'waiting';
+    // Skip already closed missions
+    if (status === 'done' || status === 'closed') continue;
+    sheetMissions.push({
+      id,
+      tech,
+      title:       titleIdx >= 0   ? String(row[titleIdx]   || '').trim() : 'Sans titre',
+      site:        siteIdx >= 0    ? String(row[siteIdx]    || '').trim() : '',
+      status:      status,
+      pct:         pctIdx >= 0     ? parseInt(row[pctIdx])  || 0          : 0,
+      missionDate: dateIdx >= 0    ? String(row[dateIdx]    || '').trim() : '',
+      priority:    prioIdx >= 0    ? String(row[prioIdx]    || 'Normale').trim() : 'Normale',
+      comment:     commentIdx >= 0 ? String(row[commentIdx] || '').trim() : '',
+    });
+  }
+
+  // Merge: add sheet missions not in local, update existing
+  sheetMissions.forEach(sm => {
+    const localIdx = appState.missions.findIndex(m => m.id === sm.id);
+    if (localIdx >= 0) {
+      // Update from sheet only if not locally modified recently
+      appState.missions[localIdx] = { ...sm, ...appState.missions[localIdx] };
+    } else {
+      appState.missions.push(sm);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+function fmtDate(d) {
+  if (!d) return '';
+  try { return new Date(d).toLocaleDateString('fr-FR'); } catch(e) { return d; }
+}
+
+function showLoading(txt = 'Chargement...') {
+  document.getElementById('loadingText').textContent = txt;
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+function toggleCode() {
+  const b = document.getElementById('codeBlock');
+  b.style.display = b.style.display === 'none' ? 'block' : 'none';
+}
+
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  const wrap = document.getElementById('toastWrap');
+  wrap.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  buildLoginGrid();
+
+  // Auto-login if last tech saved
+  const savedTech = localStorage.getItem('ttm_current_tech');
+  if (savedTech) {
+    const t = TECHS.find(x => x.id === savedTech);
+    if (t) {
+      currentTech = t;
+      loadLocal();
+      initApp();
+      document.getElementById('screen-login').classList.remove('active');
+      document.getElementById('screen-app').classList.add('active');
+    }
+  }
+
+  // Default date
+  document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>
