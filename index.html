@@ -939,7 +939,9 @@ body {
       <div class="header-avatar" id="headerAvatar"></div>
       <span class="header-techname" id="headerName"></span>
     </div>
-    <button class="header-sync" id="syncBtn" onclick="syncData()" title="Synchroniser">🔄</button>
+    <button class="header-sync" id="syncBtn" onclick="syncData()" title="Rafraîchir depuis Sheets">
+      <span id="syncIcon">🔄</span>
+    </button>
   </header>
 
   <!-- Content -->
@@ -967,7 +969,17 @@ body {
       </div>
 
       <div id="missionsList"></div>
-    </div>
+
+      <!-- Refresh bar -->
+      <div style="margin-top:1rem;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem">Dernière sync</div>
+          <div style="font-size:.82rem;font-weight:600;color:var(--text)" id="lastSyncDisplay">—</div>
+        </div>
+        <button onclick="syncData()" style="padding:.6rem 1.1rem;background:var(--accent);border:none;border-radius:10px;color:#0d1117;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:.4rem;flex-shrink:0;box-shadow:0 2px 10px rgba(43,189,200,.4)">
+          🔄 Rafraîchir
+        </button>
+      </div>
 
     <!-- TAB: Create -->
     <div class="tab-pane" id="tab-create">
@@ -1431,6 +1443,8 @@ function updateSettingsInfo() {
   document.getElementById('s_activeCnt').textContent  = appState.missions.length;
   document.getElementById('s_historyCnt').textContent = appState.history.length;
   document.getElementById('s_lastSync').textContent   = lastSync || '—';
+  const lsd = document.getElementById('lastSyncDisplay');
+  if (lsd) lsd.textContent = lastSync || 'Jamais — appuyez sur Rafraîchir';
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1607,12 +1621,13 @@ async function syncData() {
     return;
   }
 
-  const btn = document.getElementById('syncBtn');
-  btn.classList.add('syncing');
+  const btn      = document.getElementById('syncBtn');
+  const syncIcon = document.getElementById('syncIcon');
+  if (btn)      btn.classList.add('syncing');
+  if (syncIcon) syncIcon.style.display = 'none';
   showLoading('Synchronisation avec Sheets...');
 
   try {
-    // JSONP fallback for CORS
     const data = await fetchSheets(url);
     if (data && data.data) {
       mergeSheetData(data.data);
@@ -1625,7 +1640,8 @@ async function syncData() {
     console.warn('Sync error', e);
     toast('❌ Impossible de lire Sheets — données locales utilisées', 'error');
   } finally {
-    btn.classList.remove('syncing');
+    if (btn)      btn.classList.remove('syncing');
+    if (syncIcon) syncIcon.style.display = '';
     hideLoading();
   }
 }
@@ -1653,46 +1669,65 @@ function fetchSheets(url) {
 
 function mergeSheetData(rows) {
   if (!rows || rows.length < 2) return;
-  const headers = rows[0].map(h => String(h).trim().toLowerCase());
-  const idIdx     = headers.findIndex(h => h.includes('missionid') || h.includes('id'));
-  const techIdx   = headers.findIndex(h => h.includes('tech'));
-  const titleIdx  = headers.findIndex(h => h.includes('title') || h.includes('mission') || h.includes('intitulé'));
-  const siteIdx   = headers.findIndex(h => h.includes('site') || h.includes('lieu'));
-  const statusIdx = headers.findIndex(h => h.includes('status') || h.includes('statut'));
-  const pctIdx    = headers.findIndex(h => h.includes('pct') || h.includes('%') || h.includes('avancement'));
-  const dateIdx   = headers.findIndex(h => h.includes('date'));
-  const prioIdx   = headers.findIndex(h => h.includes('prio'));
-  const commentIdx = headers.findIndex(h => h.includes('comment'));
+  const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+
+  // ── Détection colonnes ──
+  const idIdx      = headers.findIndex(h => h === 'missionid' || h === 'id');
+  const techIdx    = headers.findIndex(h => h === 'tech' || h.includes('tech'));
+
+  // FIX BUG TITRE: 'missionid'.includes('mission') === true en JS
+  // → on exclut explicitement toute colonne contenant 'id' pour le titre
+  const titleIdx   = headers.findIndex(h =>
+    (h === 'title' || h === 'titre' || h === 'intitulé') ||
+    (h.includes('title')   && !h.includes('id')) ||
+    (h.includes('mission') && !h.includes('id'))
+  );
+  const siteIdx    = headers.findIndex(h => h === 'site' || h === 'lieu' || (h.includes('site') && !h.includes('web')));
+  const statusIdx  = headers.findIndex(h => h === 'status' || h === 'statut' || h.includes('status') || h.includes('statut'));
+  const pctIdx     = headers.findIndex(h => h === 'pct' || h.includes('pct') || h.includes('avancement'));
+  const dateIdx    = headers.findIndex(h => h === 'date' || h === 'missiondate' || (h.includes('date') && !h.includes('time')));
+  const prioIdx    = headers.findIndex(h => h === 'priority' || h === 'priorité' || h.includes('prio'));
+  const commentIdx = headers.findIndex(h => h === 'comment' || h === 'commentaire' || h.includes('comment'));
+
+  if (idIdx < 0 || techIdx < 0) {
+    console.warn('mergeSheetData: colonnes introuvables', headers);
+    return;
+  }
 
   // Get missions from sheet assigned to this tech
   const sheetMissions = [];
   for (let i = 1; i < rows.length; i++) {
     const row  = rows[i];
-    const tech = techIdx >= 0 ? String(row[techIdx] || '').trim() : '';
+    const tech = String(row[techIdx] || '').trim();
     if (tech !== currentTech.id) continue;
-    const id     = idIdx >= 0 ? String(row[idIdx] || '').trim() : '';
+    const id = idIdx >= 0 ? String(row[idIdx] || '').trim() : '';
     if (!id) continue;
+
+    const rawTitle = titleIdx >= 0 ? String(row[titleIdx] || '').trim() : '';
+    // Skip si titre vide ou égal à l'ID (signe que la colonne est mal détectée)
+    if (!rawTitle || rawTitle === id) continue;
+
     const status = statusIdx >= 0 ? String(row[statusIdx] || 'waiting').trim() : 'waiting';
-    // Skip already closed missions
     if (status === 'done' || status === 'closed') continue;
+
     sheetMissions.push({
       id,
       tech,
-      title:       titleIdx >= 0   ? String(row[titleIdx]   || '').trim() : 'Sans titre',
-      site:        siteIdx >= 0    ? String(row[siteIdx]    || '').trim() : '',
-      status:      status,
-      pct:         pctIdx >= 0     ? parseInt(row[pctIdx])  || 0          : 0,
-      missionDate: dateIdx >= 0    ? String(row[dateIdx]    || '').trim() : '',
-      priority:    prioIdx >= 0    ? String(row[prioIdx]    || 'Normale').trim() : 'Normale',
+      title:       rawTitle,
+      site:        siteIdx    >= 0 ? String(row[siteIdx]    || '').trim() : '',
+      status:      ['waiting','progress','done','blocked'].includes(status) ? status : 'waiting',
+      pct:         pctIdx     >= 0 ? (parseInt(row[pctIdx]) || 0) : 0,
+      missionDate: dateIdx    >= 0 ? String(row[dateIdx]    || '').trim() : '',
+      priority:    prioIdx    >= 0 ? String(row[prioIdx]    || 'Normale').trim() : 'Normale',
       comment:     commentIdx >= 0 ? String(row[commentIdx] || '').trim() : '',
     });
   }
 
-  // Merge: add sheet missions not in local, update existing
+  // Merge: ajoute les missions du Sheet absentes en local, met à jour les existantes
   sheetMissions.forEach(sm => {
     const localIdx = appState.missions.findIndex(m => m.id === sm.id);
     if (localIdx >= 0) {
-      // Update from sheet only if not locally modified recently
+      // Conserver les données locales récentes, compléter avec Sheet
       appState.missions[localIdx] = { ...sm, ...appState.missions[localIdx] };
     } else {
       appState.missions.push(sm);
