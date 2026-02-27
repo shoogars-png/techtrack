@@ -1714,15 +1714,21 @@ function mergeSheetMissions(rows) {
   // ── Détection colonnes (FIX: éviter que 'missionid' matche 'mission' pour title) ──
   const idIdx      = headers.findIndex(h => h === 'missionid' || h === 'id');
   const techIdx    = headers.findIndex(h => h === 'tech' || h.includes('tech'));
-  // FIX: title cherche 'title' ou 'titre' mais PAS si la colonne contient aussi 'id'
   const titleIdx   = headers.findIndex(h =>
     (h === 'title' || h === 'titre' || h === 'intitulé') ||
-    (h.includes('title') && !h.includes('id')) ||
+    (h.includes('title')   && !h.includes('id')) ||
     (h.includes('mission') && !h.includes('id'))
   );
   const siteIdx    = headers.findIndex(h => h === 'site' || h === 'lieu' || (h.includes('site') && !h.includes('web')));
   const statusIdx  = headers.findIndex(h => h === 'status' || h === 'statut' || h.includes('status') || h.includes('statut'));
-  const pctIdx     = headers.findIndex(h => h === 'pct' || h.includes('pct') || h.includes('avancement'));
+  // FIX pct : chercher 'pct' en priorité absolue, puis variantes
+  const pctIdx     = (() => {
+    let i = headers.findIndex(h => h === 'pct');
+    if (i >= 0) return i;
+    i = headers.findIndex(h => h === 'avancement' || h === 'progression' || h === 'percent' || h === '%');
+    if (i >= 0) return i;
+    return headers.findIndex(h => h.includes('pct') || h.includes('avancement'));
+  })();
   const dateIdx    = headers.findIndex(h => h === 'date' || h === 'missiondate' || (h.includes('date') && !h.includes('time')));
   const prioIdx    = headers.findIndex(h => h === 'priority' || h === 'priorité' || h.includes('prio'));
   const commentIdx = headers.findIndex(h => h === 'comment' || h === 'commentaire' || h.includes('comment'));
@@ -1759,7 +1765,8 @@ function mergeSheetMissions(rows) {
       priority:    prioIdx    >= 0 ? String(row[prioIdx]    || 'Normale').trim() : 'Normale',
       comment:     commentIdx >= 0 ? String(row[commentIdx] || '').trim() : '',
       status:      ['waiting','progress','done','blocked'].includes(status) ? status : 'waiting',
-      pct:         pctIdx     >= 0 ? (parseInt(row[pctIdx]) || 0) : 0,
+      // FIX: utiliser Number() plus robuste que parseInt, gérer string "50", "50%", nombre 50
+      pct:         pctIdx >= 0 ? (Math.min(100, Math.max(0, Number(String(row[pctIdx]).replace('%','').trim()) || 0))) : 0,
       source:      'mobile'
     };
 
@@ -1787,11 +1794,14 @@ function mergeSheetMissions(rows) {
     if (inHistory) continue; // déjà archivée côté bureau → on ne la ressuscite pas
 
     if (inMissions >= 0) {
-      // Mettre à jour le statut et l'avancement depuis le Sheet
+      // FIX: toujours écraser status ET pct avec les valeurs du Sheet (source de vérité)
+      const sheetPct = missionObj.pct;
+      const localMission = state.missions[tech][inMissions];
+      // On garde les métadonnées locales (title, site...) mais on prend status et pct du Sheet
       state.missions[tech][inMissions] = {
-        ...state.missions[tech][inMissions],
+        ...localMission,
         status: missionObj.status,
-        pct:    missionObj.pct
+        pct:    sheetPct,  // FIX: ne plus utiliser || pour éviter d'écraser 0 volontaire
       };
     } else {
       // Nouvelle mission venue du mobile → l'ajouter
