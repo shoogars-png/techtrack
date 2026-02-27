@@ -1547,15 +1547,21 @@ function saveMission() {
 function onPctChange(id, val) {
   const m = appState.missions.find(x => x.id === id);
   if (!m) return;
-  m.pct = parseInt(val);
+  const newPct = parseInt(val);
+  m.pct = newPct;
   const sm = STATUS_META[m.status] || STATUS_META.waiting;
   const pctEl = document.getElementById(`pct_${id}`);
   const barEl = document.getElementById(`bar_${id}`);
-  if (pctEl) pctEl.textContent = m.pct + '%';
-  if (barEl) { barEl.style.width = m.pct + '%'; barEl.style.background = sm.color; }
+  if (pctEl) pctEl.textContent = newPct + '%';
+  if (barEl) { barEl.style.width = newPct + '%'; barEl.style.background = sm.color; }
   saveLocal();
+  // FIX: capturer la valeur pct au moment du setTimeout, pas au moment du fire
   clearTimeout(pctTimers[id]);
-  pctTimers[id] = setTimeout(() => syncMissionToSheets(m), 1500);
+  pctTimers[id] = setTimeout(() => {
+    // Relire la mission depuis appState pour avoir le pct le plus récent
+    const latest = appState.missions.find(x => x.id === id);
+    if (latest) syncMissionToSheets(latest);
+  }, 1200);
 }
 
 function onStatusChange(id, val) {
@@ -1595,6 +1601,8 @@ async function syncMissionToSheets(mission) {
   const url = getSettings().sheetUrl;
   if (!url) return;
   try {
+    // FIX: pct explicitement en Number, pas mission.pct || 0 qui skipperait 0
+    const pctValue = (typeof mission.pct === 'number') ? mission.pct : (parseInt(mission.pct) || 0);
     const payload = {
       missionId: mission.id,
       date:      mission.missionDate ? fmtDate(mission.missionDate) : new Date().toLocaleDateString('fr-FR'),
@@ -1603,7 +1611,7 @@ async function syncMissionToSheets(mission) {
       site:      mission.site     || '',
       priority:  mission.priority || '',
       status:    mission.status   || '',
-      pct:       mission.pct      || 0,
+      pct:       pctValue,
       comment:   mission.comment  || '',
       timestamp: new Date().toISOString(),
       source:    'mobile'
