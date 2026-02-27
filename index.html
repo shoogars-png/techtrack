@@ -1575,14 +1575,16 @@ function closeMission(id) {
   const m = appState.missions[idx];
   const archived = {
     ...m,
-    tech: currentTech.id,
+    tech:        currentTech.id,
+    status:      'done',   // FIX: forcer 'done' au lieu de garder le statut précédent
+    pct:         100,      // FIX: forcer 100% à la clôture
     completedAt: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
   };
   appState.history.push(archived);
   appState.missions.splice(idx, 1);
   saveLocal();
   renderAll();
-  syncMissionToSheets({ ...archived, closed: true });
+  syncMissionToSheets(archived); // FIX: envoyer l'objet avec status:'done' et pct:100
   toast(`🏁 Mission clôturée`, 'success');
 }
 
