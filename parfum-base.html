@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BASE PARFUM — Gestionnaire de Composants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #e8e2d9;
+    --surface:   #f0ebe1;
+    --card:      #ede7dc;
+    --border:    #cec5b5;
+    --border-soft:#d8d0c2;
+    --gold:      #8a6b2a;
+    --gold-pale: #a07c28;
+    --gold-dim:  #b8962e;
+    --gold-bg:   rgba(138,107,42,0.09);
+    --text:      #080500;
+    --text-dim:  #2e2218;
+    --text-faint:#564637;
+    --red:       #b03a2e;
+    --green:     #1e8449;
+    --radius:    4px;
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    --shadow-sm: 0 1px 4px rgba(44,36,24,0.06);
+    --shadow-md: 0 4px 24px rgba(44,36,24,0.10);
+    --shadow-lg: 0 16px 48px rgba(44,36,24,0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 10% 0%, rgba(154,123,58,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 90% 100%, rgba(154,123,58,0.04) 0%, transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(232,226,217,0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    box-shadow: var(--shadow-sm);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .logo span {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold);
+    margin-left: 8px;
+    text-transform: none;
+    letter-spacing: 0.06em;
+    font-size: 1.5rem;
+  }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--surface);
+    color: var(--text-dim);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--card); }
+  .btn-primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(154,123,58,0.25);
+  }
+  .btn-primary:hover { background: var(--gold-pale); border-color: var(--gold-pale); color: #fff; }
+  .btn-danger { border-color: #e8c5c1; color: var(--red); background: #fff8f7; }
+  .btn-danger:hover { background: rgba(176,58,46,0.06); border-color: var(--red); }
+  .btn-icon { padding: 8px; }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* ── STATS ROW ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat {
+    background: var(--surface);
+    padding: 1.4rem 1.6rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px;
+    position: relative;
+    min-height: 110px;
+  }
+  .stat-label {
+    position: absolute;
+    top: 0.8rem; left: 1rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.2rem;
+    font-weight: 400;
+    color: var(--gold);
+    line-height: 1;
+    text-align: center;
+  }
+  #statLast {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  /* ── SEARCH & FILTERS ── */
+  .toolbar {
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    position: relative; flex: 1; min-width: 240px;
+  }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 10px 14px 10px 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  #searchInput::placeholder { color: var(--text-faint); }
+  #searchInput:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(154,123,58,0.08); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: #ddd6c8; }
+  th {
+    padding: 12px 16px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--transition);
+  }
+  th:hover { color: var(--gold); }
+  th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+  th.sorted .sort-arrow { opacity: 1; color: var(--gold); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--gold-bg); }
+  tbody tr.selected { background: rgba(154,123,58,0.1); }
+
+  td {
+    padding: 13px 16px;
+    font-size: 0.87rem;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  td.ref { font-family: 'Jost', sans-serif; font-weight: 500; color: var(--gold); font-size: 0.82rem; letter-spacing: 0.06em; }
+  td.date { color: var(--text-faint); font-size: 0.78rem; }
+  td.note { color: var(--text-dim); font-size: 0.82rem; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(154,123,58,0.08);
+    border: 1px solid rgba(154,123,58,0.2);
+    border-radius: 2px;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    margin: 1px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-faint);
+  }
+  .empty-state svg { margin-bottom: 1rem; opacity: 0.25; }
+  .empty-state p { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-dim); }
+
+  /* ── LOADING ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem;
+    color: var(--text-faint);
+    gap: 12px;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── PAGINATION ── */
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    background: #ddd6c8;
+  }
+  .page-info { color: var(--text-faint); }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btn {
+    padding: 4px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    transition: var(--transition);
+  }
+  .page-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .page-btn.active { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── MODAL OVERLAY ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(44,36,24,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(16px) scale(0.98);
+    transition: transform var(--transition);
+    position: relative;
+    box-shadow: var(--shadow-lg);
+  }
+  .overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-header {
+    padding: 1.6rem 2rem 1.3rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem;
+    background: #e4ddd0;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.55rem;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+  .modal-subtitle {
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-faint); font-size: 1.2rem;
+    line-height: 1; padding: 4px;
+    transition: color var(--transition);
+    flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body { padding: 1.6rem 2rem; }
+  .modal-footer {
+    padding: 1.2rem 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+    background: #e4ddd0;
+  }
+
+  /* ── FORM ── */
+  .form-section {
+    margin-bottom: 1.6rem;
+  }
+  .form-section-title {
+    font-size: 0.63rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(154,123,58,0.15);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  input[type="text"], textarea, select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 3px rgba(154,123,58,0.08);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── DETAIL VIEW ── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .detail-cell {
+    background: var(--card);
+    padding: 1rem 1.2rem;
+  }
+  .detail-cell.full { grid-column: 1 / -1; }
+  .detail-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 5px;
+  }
+  .detail-value {
+    font-size: 0.92rem;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .detail-value.ref {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    font-size: 1rem;
+  }
+  .detail-value.note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--text-dim);
+    line-height: 1.75;
+  }
+  .detail-value.empty { color: var(--text-faint); font-style: italic; }
+  .detail-meta {
+    display: flex; gap: 1.5rem;
+    font-size: 0.73rem;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    margin-top: 0.6rem;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    color: var(--text);
+    z-index: 999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all var(--transition);
+    pointer-events: none;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow-md);
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  /* ── CONFIG BANNER ── */
+  #configBanner {
+    background: linear-gradient(135deg, rgba(154,123,58,0.06), rgba(154,123,58,0.02));
+    border: 1px solid rgba(154,123,58,0.2);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  #configBanner p { font-size: 0.82rem; color: var(--text-dim); }
+  #configBanner code {
+    background: rgba(154,123,58,0.08);
+    padding: 2px 6px; border-radius: 2px;
+    font-size: 0.78rem; color: var(--gold);
+    font-family: 'Jost', monospace;
+  }
+  #configBanner.hidden { display: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    header { padding: 0 1rem; }
+    main { padding: 1rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-cell.full { grid-column: 1; }
+    th:nth-child(n+4) { display: none; }
+    td:nth-child(n+4) { display: none; }
+    .modal { border-radius: 8px; }
+    .modal-body { padding: 1.2rem 1.2rem; }
+    .modal-header { padding: 1.2rem 1.2rem 1rem; }
+    .modal-footer { padding: 1rem 1.2rem; }
+  }
+
+  /* ── ORNAMENT ── */
+  .ornament {
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    margin: 1rem 0;
+  }
+
+  .highlight { background: rgba(154,123,58,0.18); border-radius: 2px; }
+
+  /* ── RESULT COUNT ── */
+  .result-count {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="logo">BASE <span>Parfum</span></div>
+  <div class="header-actions">
+    <button class="btn" onclick="openConfig()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+      Config
+    </button>
+    <button class="btn btn-primary" onclick="openForm()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau
+    </button>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main>
+
+  <!-- Config Banner -->
+  <div id="configBanner">
+    <p>⚙️ <strong>Configuration requise</strong> — Renseigne l'URL de ton Google Apps Script dans les paramètres. <code>Config</code> → puis colle l'URL Web App.</p>
+    <button class="btn" onclick="openConfig()">Configurer →</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-label">Formules totales</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statToday">—</div>
+      <div class="stat-label">Ajoutées aujourd'hui</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statFiltered">—</div>
+      <div class="stat-label">Résultats filtrés</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statLast">—</div>
+      <div class="stat-label">Dernière modification</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Rechercher REF, composant, note…" oninput="onSearch(this.value)">
+    </div>
+    <span class="result-count" id="resultCount"></span>
+    <button class="btn" onclick="loadData()" title="Actualiser">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('date')" id="th-date">Date <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('ref')" id="th-ref">Référence <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('c1')" id="th-c1">Composant 1 <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('c2')" id="th-c2">Composant 2 <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('c3')" id="th-c3">Composant 3 <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('c4')" id="th-c4">Composant 4 <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('c5')" id="th-c5">Composant 5 <span class="sort-arrow">↕</span></th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="8"><div class="loading"><div class="spinner"></div> Chargement…</div></td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination" style="display:none">
+      <span class="page-info" id="pageInfo"></span>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ MODAL FORM (Ajout/Édition) ══ -->
+<div class="overlay" id="formOverlay" onclick="closeOnOverlay(event,'formOverlay')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="formTitle">Nouvelle formule</div>
+        <div class="modal-subtitle" id="formSubtitle">Renseigne les composants de ta base</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('formOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">Identification</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Référence *</label>
+            <input type="text" id="fRef" placeholder="Ex : REF2602-AAB1">
+          </div>
+          <div class="form-field">
+            <!-- auto-généré, visible en lecture -->
+            <label>Date de création</label>
+            <input type="text" id="fDate" placeholder="Auto" readonly style="color:var(--text-faint);">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Composition</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Composant 1</label>
+            <input type="text" id="fC1" placeholder="Ingrédient 1">
+          </div>
+          <div class="form-field">
+            <label>Composant 2</label>
+            <input type="text" id="fC2" placeholder="Ingrédient 2">
+          </div>
+          <div class="form-field">
+            <label>Composant 3</label>
+            <input type="text" id="fC3" placeholder="Ingrédient 3">
+          </div>
+          <div class="form-field">
+            <label>Composant 4</label>
+            <input type="text" id="fC4" placeholder="Ingrédient 4">
+          </div>
+          <div class="form-field full">
+            <label>Composant 5</label>
+            <input type="text" id="fC5" placeholder="Ingrédient 5">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Notes & Observations</div>
+        <div class="form-field">
+          <label>Note</label>
+          <textarea id="fNote" placeholder="Commentaires, observations, dosages…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('formOverlay')">Annuler</button>
+      <button class="btn btn-primary" onclick="submitForm()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DETAIL (Pop-up fiche) ══ -->
+<div class="overlay" id="detailOverlay" onclick="closeOnOverlay(event,'detailOverlay')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detailRef" style="font-size:1.2rem;letter-spacing:0.1em;color:var(--gold)"></div>
+        <div class="modal-subtitle" id="detailDate"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('detailOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="detail-cell">
+          <div class="detail-label">Composant 1</div>
+          <div class="detail-value" id="dC1"></div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-label">Composant 2</div>
+          <div class="detail-value" id="dC2"></div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-label">Composant 3</div>
+          <div class="detail-value" id="dC3"></div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-label">Composant 4</div>
+          <div class="detail-value" id="dC4"></div>
+        </div>
+        <div class="detail-cell full">
+          <div class="detail-label">Composant 5</div>
+          <div class="detail-value" id="dC5"></div>
+        </div>
+        <div class="detail-cell full">
+          <div class="detail-label">Note / Observation</div>
+          <div class="detail-value note" id="dNote"></div>
+        </div>
+      </div>
+      <div class="detail-meta">
+        <span>Créé le <strong id="dDateCreation"></strong></span>
+        <span>Modifié le <strong id="dDateModif"></strong></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteRow()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Supprimer
+      </button>
+      <button class="btn" onclick="editRow()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Modifier
+      </button>
+      <button class="btn btn-primary" onclick="closeModal('detailOverlay')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIG ══ -->
+<div class="overlay" id="configOverlay" onclick="closeOnOverlay(event,'configOverlay')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Configuration</div>
+        <div class="modal-subtitle">Connexion Google Sheets</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('configOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">URL du Web App</div>
+        <div class="form-field">
+          <label>Google Apps Script — URL de déploiement</label>
+          <input type="text" id="configUrl" placeholder="https://script.google.com/macros/s/…/exec">
+        </div>
+        <p style="font-size:0.76rem;color:var(--text-faint);margin-top:8px;line-height:1.6;">
+          Dans Google Sheets → Extensions → Apps Script → Déployer → Nouveau déploiement → Web App.<br>
+          Accès : <strong style="color:var(--text-dim)">Tout le monde</strong>. Copie l'URL ici.
+        </p>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Paramètres d'affichage</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Lignes par page</label>
+            <select id="configPageSize">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('configOverlay')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let CONFIG = {
+  scriptUrl: localStorage.getItem('parfum_scriptUrl') || '',
+  pageSize: parseInt(localStorage.getItem('parfum_pageSize') || '20')
+};
+
+let allData = [];       // raw from sheets
+let filteredData = [];  // after search
+let currentPage = 1;
+let sortCol = 'date';
+let sortDir = -1;       // -1 = desc
+let editingRef = null;  // ref being edited
+let detailRef = null;   // ref shown in detail
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (CONFIG.scriptUrl) {
+    document.getElementById('configBanner').classList.add('hidden');
+    loadData();
+  }
+  document.getElementById('configUrl').value = CONFIG.scriptUrl;
+  document.getElementById('configPageSize').value = CONFIG.pageSize;
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['formOverlay','detailOverlay','configOverlay'].forEach(closeModal);
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+      e.preventDefault(); openForm();
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  API — GOOGLE APPS SCRIPT
+// ═══════════════════════════════════════════════
+async function apiCall(params) {
+  if (!CONFIG.scriptUrl) { showToast('Configure l\'URL du script d\'abord.', 'error'); return null; }
+  const url = CONFIG.scriptUrl + '?' + new URLSearchParams(params);
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    return json;
+  } catch (e) {
+    showToast('Erreur de connexion au serveur.', 'error');
+    return null;
+  }
+}
+
+async function apiPost(body) {
+  if (!CONFIG.scriptUrl) { showToast('Configure l\'URL du script d\'abord.', 'error'); return null; }
+  try {
+    const res = await fetch(CONFIG.scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    return await res.json();
+  } catch (e) {
+    showToast('Erreur lors de l\'envoi des données.', 'error');
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════════════
+async function loadData() {
+  setTableLoading();
+  const data = await apiCall({ action: 'getAll' });
+  if (!data) { setTableError(); return; }
+  allData = data.rows || [];
+  filteredData = [...allData];
+  updateStats();
+  applySort();
+  renderTable();
+}
+
+function setTableLoading() {
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td colspan="8"><div class="loading"><div class="spinner"></div> Chargement…</div></td></tr>`;
+  document.getElementById('pagination').style.display = 'none';
+}
+
+function setTableError() {
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td colspan="8"><div class="empty-state">
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>Impossible de charger les données</p>
+    </div></td></tr>`;
+}
+
+// ═══════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════
+let searchTimeout;
+function onSearch(q) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const term = q.toLowerCase().trim();
+    if (!term) {
+      filteredData = [...allData];
+    } else {
+      filteredData = allData.filter(r =>
+        [r.ref, r.c1, r.c2, r.c3, r.c4, r.c5, r.note]
+          .some(v => v && v.toLowerCase().includes(term))
+      );
+    }
+    currentPage = 1;
+    updateStats();
+    renderTable();
+  }, 200);
+}
+
+// ═══════════════════════════════════════════════
+//  SORT
+// ═══════════════════════════════════════════════
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  const th = document.getElementById('th-' + col);
+  if (th) { th.classList.add('sorted'); th.querySelector('.sort-arrow').textContent = sortDir === 1 ? '↑' : '↓'; }
+  applySort();
+  renderTable();
+}
+
+function applySort() {
+  const key = { date: 'dateRaw', ref: 'ref', c1: 'c1', c2: 'c2', c3: 'c3', c4: 'c4', c5: 'c5' }[sortCol] || 'dateRaw';
+  filteredData.sort((a, b) => {
+    const av = a[key] || '', bv = b[key] || '';
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER TABLE
+// ═══════════════════════════════════════════════
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const total = filteredData.length;
+  const pages = Math.ceil(total / CONFIG.pageSize) || 1;
+  currentPage = Math.min(currentPage, pages);
+
+  const start = (currentPage - 1) * CONFIG.pageSize;
+  const slice = filteredData.slice(start, start + CONFIG.pageSize);
+
+  const tbody = document.getElementById('tableBody');
+
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>${q ? 'Aucun résultat pour "' + q + '"' : 'Aucune formule enregistrée'}</p>
+    </div></td></tr>`;
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => {
+    const safeRef = escHtml(r.ref);
+    return `<tr data-ref="${safeRef}" style="cursor:pointer">
+      <td class="date">${shortDate(r.dateStr)}</td>
+      <td class="ref">${highlight(r.ref, q)}</td>
+      <td>${highlight(r.c1, q)}</td>
+      <td>${highlight(r.c2, q)}</td>
+      <td>${highlight(r.c3, q)}</td>
+      <td>${highlight(r.c4, q)}</td>
+      <td>${highlight(r.c5, q)}</td>
+      <td class="note">${highlight(r.note, q)}</td>
+    </tr>`;
+  }).join('');
+
+  // Attach click handlers via data-ref (évite les problèmes de quotes dans onclick)
+  tbody.querySelectorAll('tr[data-ref]').forEach(tr => {
+    tr.addEventListener('click', () => openDetail(tr.dataset.ref));
+  });
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  pag.style.display = 'flex';
+  document.getElementById('pageInfo').textContent = `${start + 1}–${Math.min(start + CONFIG.pageSize, total)} sur ${total}`;
+
+  const pagBtns = document.getElementById('pageBtns');
+  let btns = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let p = Math.max(1, currentPage-2); p <= Math.min(pages, currentPage+2); p++) {
+    btns += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  btns += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  pagBtns.innerHTML = btns;
+
+  document.getElementById('resultCount').textContent = total > 0 ? `${total} résultat${total>1?'s':''}` : '';
+}
+
+function highlight(text, q) {
+  if (!text) return '<span style="color:var(--text-faint)">—</span>';
+  if (!q) return escHtml(text);
+  const escaped = escHtml(text);
+  const escapedQ = escHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(`(${escapedQ})`, 'gi'), '<mark class="highlight">$1</mark>');
+}
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+// ═══════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════
+function cleanDate(str) {
+  if (!str) return '—';
+  return str.replace(/\s+GMT[+-]\d{4}\s*\(.*\)/, '').trim();
+}
+
+function shortDate(str) {
+  if (!str) return '—';
+  // Retourne seulement "Sat Feb 28 2026" (les 4 premiers mots si format long)
+  const clean = cleanDate(str);
+  // Si format dd/mm/yyyy on garde tel quel
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(clean)) return clean.substring(0, 10);
+  // Si format "Sat Feb 28 2026 12:28:33" on prend les 4 premiers tokens
+  const parts = clean.split(' ');
+  return parts.slice(0, 4).join(' ');
+}
+
+function updateStats() {
+  const today = new Date().toLocaleDateString('fr-FR');
+  const todayCount = allData.filter(r => r.dateStr === today).length;
+  const lastModif = allData.length ? allData.reduce((a,b) => (a.modifRaw||'') > (b.modifRaw||'') ? a : b) : null;
+
+  document.getElementById('statTotal').textContent = allData.length;
+  document.getElementById('statToday').textContent = todayCount;
+  document.getElementById('statFiltered').textContent = filteredData.length;
+  document.getElementById('statLast').textContent = lastModif ? cleanDate(lastModif.modifStr) : '—';
+}
+
+// ═══════════════════════════════════════════════
+//  FORM (Add / Edit)
+// ═══════════════════════════════════════════════
+function openForm(prefill = null) {
+  editingRef = prefill ? prefill.ref : null;
+  document.getElementById('formTitle').textContent = editingRef ? 'Modifier la formule' : 'Nouvelle formule';
+  document.getElementById('formSubtitle').textContent = editingRef ? `Référence : ${editingRef}` : 'Renseigne les composants de ta base';
+  const now = new Date().toLocaleDateString('fr-FR');
+  document.getElementById('fDate').value = prefill ? prefill.dateStr : now;
+  document.getElementById('fRef').value = prefill ? prefill.ref : '';
+  document.getElementById('fRef').readOnly = !!editingRef;
+  document.getElementById('fC1').value = prefill ? prefill.c1 : '';
+  document.getElementById('fC2').value = prefill ? prefill.c2 : '';
+  document.getElementById('fC3').value = prefill ? prefill.c3 : '';
+  document.getElementById('fC4').value = prefill ? prefill.c4 : '';
+  document.getElementById('fC5').value = prefill ? prefill.c5 : '';
+  document.getElementById('fNote').value = prefill ? prefill.note : '';
+  openModal('formOverlay');
+  setTimeout(() => document.getElementById('fRef').focus(), 100);
+}
+
+async function submitForm() {
+  const ref = document.getElementById('fRef').value.trim();
+  if (!ref) { showToast('La référence est obligatoire.', 'error'); return; }
+
+  const payload = {
+    action: editingRef ? 'update' : 'add',
+    ref,
+    c1:   document.getElementById('fC1').value.trim(),
+    c2:   document.getElementById('fC2').value.trim(),
+    c3:   document.getElementById('fC3').value.trim(),
+    c4:   document.getElementById('fC4').value.trim(),
+    c5:   document.getElementById('fC5').value.trim(),
+    note: document.getElementById('fNote').value.trim()
+  };
+
+  const res = await apiPost(payload);
+  if (res && res.status === 'ok') {
+    showToast(editingRef ? 'Formule mise à jour.' : 'Formule ajoutée.', 'success');
+    closeModal('formOverlay');
+    await loadData();
+  } else {
+    showToast('Erreur lors de l\'enregistrement.', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  DETAIL
+// ═══════════════════════════════════════════════
+function openDetail(ref) {
+  const r = allData.find(x => x.ref === ref);
+  if (!r) return;
+  detailRef = ref;
+
+  document.getElementById('detailRef').textContent = r.ref;
+  document.getElementById('detailDate').textContent = 'Créé le ' + (r.dateStr || '—');
+
+  const fill = (id, val) => {
+    const el = document.getElementById(id);
+    el.textContent = val || '—';
+    el.classList.toggle('empty', !val);
+  };
+  fill('dC1', r.c1); fill('dC2', r.c2); fill('dC3', r.c3);
+  fill('dC4', r.c4); fill('dC5', r.c5); fill('dNote', r.note);
+
+  document.getElementById('dDateCreation').textContent = r.dateStr || '—';
+  document.getElementById('dDateModif').textContent = cleanDate(r.modifStr);
+
+  openModal('detailOverlay');
+}
+
+function editRow() {
+  const r = allData.find(x => x.ref === detailRef);
+  if (!r) return;
+  closeModal('detailOverlay');
+  openForm(r);
+}
+
+async function deleteRow() {
+  if (!detailRef) return;
+  if (!confirm(`Supprimer définitivement "${detailRef}" ?`)) return;
+  const res = await apiPost({ action: 'delete', ref: detailRef });
+  if (res && res.status === 'ok') {
+    showToast('Formule supprimée.', 'success');
+    closeModal('detailOverlay');
+    await loadData();
+  } else {
+    showToast('Erreur lors de la suppression.', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+function openConfig() { openModal('configOverlay'); }
+
+function saveConfig() {
+  const url = document.getElementById('configUrl').value.trim();
+  const size = parseInt(document.getElementById('configPageSize').value);
+  CONFIG.scriptUrl = url;
+  CONFIG.pageSize = size;
+  localStorage.setItem('parfum_scriptUrl', url);
+  localStorage.setItem('parfum_pageSize', size);
+  if (url) document.getElementById('configBanner').classList.add('hidden');
+  closeModal('configOverlay');
+  showToast('Configuration sauvegardée.', 'success');
+  if (url) loadData();
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeOnOverlay(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '·';
+  t.innerHTML = `<span>${icon}</span> ${msg}`;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+}
+</script>
+</body>
+</html>
