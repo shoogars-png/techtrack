@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BASE Parfum">
+<meta name="theme-color" content="#e8e2d9">
+<title>BASE Parfum — Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   VARIABLES
+══════════════════════════════════════ */
+:root {
+  --bg:         #e8e2d9;
+  --surface:    #f0ebe1;
+  --card:       #ede7dc;
+  --border:     #cec5b5;
+  --border-soft:#d8d0c2;
+  --gold:       #8a6b2a;
+  --gold-pale:  #a07c28;
+  --gold-dim:   #b8962e;
+  --gold-bg:    rgba(138,107,42,0.09);
+  --text:       #080500;
+  --text-dim:   #2e2218;
+  --text-faint: #564637;
+  --red:        #b03a2e;
+  --green:      #1e8449;
+  --nav-h:      64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --transition: 0.28s cubic-bezier(0.4,0,0.2,1);
+  --shadow-sm:  0 1px 4px rgba(44,36,24,0.08);
+  --shadow-md:  0 4px 20px rgba(44,36,24,0.12);
+  --shadow-lg:  0 12px 40px rgba(44,36,24,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  overscroll-behavior: none;
+}
+
+/* ── BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 0%, rgba(138,107,42,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(138,107,42,0.04) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ══════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════ */
+#app {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  padding-top: var(--safe-top);
+}
+
+/* ── TOP HEADER ── */
+.top-bar {
+  position: relative; z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.top-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.top-logo em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  font-size: 0.95rem;
+  margin-left: 5px;
+}
+.top-actions { display: flex; gap: 4px; }
+.icon-btn {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-faint);
+  border-radius: 50%;
+  transition: background var(--transition), color var(--transition);
+}
+.icon-btn:active { background: var(--gold-bg); color: var(--gold); }
+
+/* ── PAGES CONTAINER ── */
+#pages {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+.page.active { opacity: 1; pointer-events: all; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: relative; z-index: 10;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  box-shadow: 0 -2px 12px rgba(44,36,24,0.08);
+}
+.nav-btn {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  height: var(--nav-h);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-faint);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color var(--transition);
+  position: relative;
+}
+.nav-btn.active { color: var(--gold); }
+.nav-btn.active::before {
+  content: '';
+  position: absolute; top: 0; left: 20%; right: 20%;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 0 0 2px 2px;
+}
+.nav-btn svg { transition: transform var(--transition); }
+.nav-btn.active svg { transform: scale(1.1); }
+
+/* ══════════════════════════════════════
+   PAGE: LISTE
+══════════════════════════════════════ */
+.search-bar {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.search-inner {
+  position: relative;
+}
+.search-inner svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-faint); pointer-events: none;
+}
+.search-inner input {
+  width: 100%;
+  padding: 10px 36px 10px 38px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 300;
+  outline: none;
+  -webkit-appearance: none;
+}
+.search-inner input::placeholder { color: var(--text-faint); }
+.search-inner input:focus { border-color: var(--gold-dim); }
+.search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-faint);
+  font-size: 1rem; cursor: pointer; padding: 4px;
+  display: none;
+}
+.search-clear.visible { display: block; }
+
+.list-meta {
+  padding: 8px 14px 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+/* ── CARDS ── */
+.card-list { padding: 6px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--gold);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.card:active { transform: scale(0.985); box-shadow: none; background: var(--card); }
+.card:active::before { opacity: 1; }
+
+.card-ref {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-date {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.card-composants {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  margin-bottom: 8px;
+}
+.chip {
+  padding: 3px 9px;
+  background: var(--gold-bg);
+  border: 1px solid rgba(138,107,42,0.2);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+.chip.empty { opacity: 0; pointer-events: none; }
+
+.card-note {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-arrow {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--border);
+}
+
+/* Loading / empty */
+.list-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 4rem 2rem; gap: 12px;
+  color: var(--text-faint);
+  font-size: 0.8rem; letter-spacing: 0.08em;
+}
+.spinner {
+  width: 22px; height: 22px;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-msg {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+.empty-msg p {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  color: var(--text-faint);
+  font-size: 1.1rem;
+  margin-top: 12px;
+}
+
+/* ── LOAD MORE ── */
+.load-more-btn {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 8px 12px 4px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+}
+.load-more-btn:active { background: var(--gold-bg); color: var(--gold); }
+
+/* ══════════════════════════════════════
+   PAGE: STATS
+══════════════════════════════════════ */
+.stats-page { padding: 14px 12px; }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; gap: 16px;
+}
+.stat-icon {
+  width: 44px; height: 44px;
+  background: var(--gold-bg);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.stat-info { flex: 1; }
+.stat-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--gold);
+  line-height: 1;
+}
+.stat-value.small {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.stats-section-title {
+  font-size: 0.63rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 16px 2px 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(138,107,42,0.15);
+}
+
+/* ══════════════════════════════════════
+   PAGE: FORMULAIRE
+══════════════════════════════════════ */
+.form-page { padding: 14px 12px; }
+
+.form-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.form-section-header {
+  padding: 10px 14px;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(138,107,42,0.05);
+  border-bottom: 1px solid var(--border-soft);
+}
+.form-field {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.form-field:last-child { border-bottom: none; }
+.form-field label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+.form-field input, .form-field textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  padding: 10px 12px;
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color var(--transition);
+}
+.form-field input:focus, .form-field textarea:focus {
+  border-color: var(--gold-dim);
+}
+.form-field textarea { resize: none; height: 80px; }
+.form-field input[readonly] { color: var(--text-faint); background: var(--card); }
+
+.form-submit {
+  width: 100%;
+  padding: 15px;
+  background: var(--gold);
+  border: none; border-radius: 10px;
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(138,107,42,0.3);
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.form-submit:active { background: var(--gold-pale); transform: scale(0.98); }
+
+/* ══════════════════════════════════════
+   SHEET DÉTAIL (slide-up)
+══════════════════════════════════════ */
+#detailSheet {
+  position: fixed; inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+#detailSheet.open { pointer-events: all; }
+
+.sheet-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(44,36,24,0.4);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+#detailSheet.open .sheet-backdrop { opacity: 1; }
+
+.sheet-panel {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform var(--transition);
+  padding-bottom: calc(var(--safe-bottom) + 8px);
+  box-shadow: var(--shadow-lg);
+}
+#detailSheet.open .sheet-panel { transform: translateY(0); }
+
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+.sheet-header {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border-soft);
+  background: #ede7dc;
+}
+.sheet-ref {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.sheet-created {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin-top: 3px;
+  letter-spacing: 0.05em;
+}
+
+.sheet-body { padding: 14px 18px; }
+
+.sheet-section-title {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 14px 0 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(138,107,42,0.12);
+}
+.sheet-section-title:first-child { margin-top: 0; }
+
+.composants-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.comp-cell {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 9px 11px;
+}
+.comp-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 3px;
+}
+.comp-val {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 400;
+}
+.comp-val.empty { color: var(--text-faint); font-style: italic; font-size: 0.8rem; }
+
+.note-box {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  min-height: 48px;
+}
+.note-box.empty { color: var(--text-faint); font-size: 0.82rem; }
+
+.sheet-meta {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  display: flex; justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.sheet-actions {
+  display: flex; gap: 8px;
+  padding: 14px 18px 4px;
+  border-top: 1px solid var(--border-soft);
+}
+.sheet-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: var(--transition);
+}
+.sheet-btn:active { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-dim); }
+.sheet-btn.danger { color: var(--red); border-color: #e0c0bc; background: #faf5f4; }
+.sheet-btn.danger:active { background: rgba(176,58,46,0.08); }
+
+/* ══════════════════════════════════════
+   SHEET CONFIG (slide-up)
+══════════════════════════════════════ */
+#configSheet {
+  position: fixed; inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+#configSheet.open { pointer-events: all; }
+#configSheet .sheet-backdrop {
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+#configSheet.open .sheet-backdrop { opacity: 1; }
+#configSheet .sheet-panel {
+  transform: translateY(100%);
+}
+#configSheet.open .sheet-panel { transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   FAB
+══════════════════════════════════════ */
+#fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 14px);
+  z-index: 50;
+  width: 54px; height: 54px;
+  background: var(--gold);
+  border: none; border-radius: 50%;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 18px rgba(138,107,42,0.35);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+#fab:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(138,107,42,0.25); }
+#fab.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 10px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: var(--surface);
+  border-radius: 20px;
+  padding: 9px 18px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  z-index: 500;
+  opacity: 0;
+  transition: all var(--transition);
+  pointer-events: none;
+  display: flex; align-items: center; gap: 8px;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { background: var(--green); }
+#toast.error { background: var(--red); }
+
+/* ══════════════════════════════════════
+   HIGHLIGHT
+══════════════════════════════════════ */
+mark.hl {
+  background: rgba(138,107,42,0.2);
+  border-radius: 2px;
+  color: inherit;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── TOP BAR ── -->
+  <div class="top-bar">
+    <div class="top-logo">BASE <em>Parfum</em></div>
+    <div class="top-actions">
+      <button class="icon-btn" onclick="refreshData()" title="Actualiser">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openConfig()" title="Config">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PAGES ── -->
+  <div id="pages">
+
+    <!-- PAGE LISTE -->
+    <div class="page active" id="page-liste">
+      <div class="search-bar">
+        <div class="search-inner">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="searchInput" placeholder="REF, composant, note…" oninput="onSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+        </div>
+      </div>
+      <div class="list-meta" id="listMeta"></div>
+      <div class="card-list" id="cardList">
+        <div class="list-loading"><div class="spinner"></div> Chargement…</div>
+      </div>
+      <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()" style="display:none">
+        Afficher plus
+      </button>
+    </div>
+
+    <!-- PAGE STATS -->
+    <div class="page" id="page-stats">
+      <div class="stats-page">
+        <div class="stats-section-title">Aperçu général</div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Formules totales</div>
+            <div class="stat-value" id="sTotal">—</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Ajoutées aujourd'hui</div>
+            <div class="stat-value" id="sToday">—</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Résultats filtrés</div>
+            <div class="stat-value" id="sFiltered">—</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Dernière modification</div>
+            <div class="stat-value small" id="sLast">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE FORMULAIRE -->
+    <div class="page" id="page-form">
+      <div class="form-page" id="formContent">
+        <!-- Généré dynamiquement -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── BOTTOM NAV ── -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-liste" onclick="showPage('liste')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Liste
+    </button>
+    <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Stats
+    </button>
+    <button class="nav-btn" id="nav-form" onclick="showPage('form'); buildForm(null)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Nouveau
+    </button>
+  </nav>
+
+</div>
+
+<!-- ── FAB (visible sur Liste) ── -->
+<button id="fab" onclick="showPage('form'); buildForm(null)">
+  <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- ══ SHEET DÉTAIL ══ -->
+<div id="detailSheet">
+  <div class="sheet-backdrop" onclick="closeDetail()"></div>
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-ref" id="sheetRef"></div>
+      <div class="sheet-created" id="sheetCreated"></div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-section-title">Composition</div>
+      <div class="composants-grid">
+        <div class="comp-cell"><div class="comp-label">Composant 1</div><div class="comp-val" id="sC1"></div></div>
+        <div class="comp-cell"><div class="comp-label">Composant 2</div><div class="comp-val" id="sC2"></div></div>
+        <div class="comp-cell"><div class="comp-label">Composant 3</div><div class="comp-val" id="sC3"></div></div>
+        <div class="comp-cell"><div class="comp-label">Composant 4</div><div class="comp-val" id="sC4"></div></div>
+        <div class="comp-cell" style="grid-column:1/-1"><div class="comp-label">Composant 5</div><div class="comp-val" id="sC5"></div></div>
+      </div>
+      <div class="sheet-section-title">Note & Observation</div>
+      <div class="note-box" id="sNote"></div>
+      <div class="sheet-meta">
+        <span>Créé : <strong id="sDateCreation"></strong></span>
+        <span>Modifié : <strong id="sDateModif"></strong></span>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-btn danger" onclick="deleteEntry()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        Supprimer
+      </button>
+      <button class="sheet-btn" onclick="editEntry()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Modifier
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHEET CONFIG ══ -->
+<div id="configSheet">
+  <div class="sheet-backdrop" onclick="closeConfig()"></div>
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-ref" style="font-size:1rem;font-family:'Jost',sans-serif;font-weight:400;letter-spacing:0.08em;">Configuration</div>
+      <div class="sheet-created">Connexion Google Sheets</div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-section-title">URL Apps Script</div>
+      <div class="form-field" style="padding:0;margin-bottom:10px;">
+        <input type="url" id="configUrl" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Jost',sans-serif;font-size:0.85rem;padding:10px 12px;outline:none;-webkit-appearance:none;">
+      </div>
+      <p style="font-size:0.73rem;color:var(--text-faint);line-height:1.6;margin-bottom:16px;">
+        Extensions → Apps Script → Déployer → Nouveau déploiement → Web App → Accès : <strong style="color:var(--text-dim)">Tout le monde</strong>
+      </p>
+      <button class="form-submit" onclick="saveConfig()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Sauvegarder
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG & STATE
+// ═══════════════════════════════════════════════
+let CONFIG = {
+  scriptUrl: localStorage.getItem('parfum_scriptUrl') || ''
+};
+
+let allData = [];
+let filteredData = [];
+let displayCount = 20;
+let currentPage = 'liste';
+let detailRef = null;
+let editingRef = null;
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('configUrl').value = CONFIG.scriptUrl;
+  if (CONFIG.scriptUrl) {
+    loadData();
+  } else {
+    document.getElementById('cardList').innerHTML = `<div class="empty-msg">
+      <svg width="36" height="36" fill="none" stroke="var(--text-faint)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>Configure l'URL du script</p>
+    </div>`;
+    openConfig();
+  }
+
+  // Swipe to close detail sheet
+  setupSwipeToClose('detailSheet', 'sheetPanel');
+});
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  currentPage = name;
+  document.getElementById('fab').classList.toggle('hidden', name !== 'liste');
+  if (name === 'stats') updateStats();
+}
+
+// ═══════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════
+async function apiGet(params) {
+  if (!CONFIG.scriptUrl) { showToast('URL non configurée', 'error'); return null; }
+  try {
+    const res = await fetch(CONFIG.scriptUrl + '?' + new URLSearchParams(params));
+    return await res.json();
+  } catch { showToast('Erreur de connexion', 'error'); return null; }
+}
+
+async function apiPost(body) {
+  if (!CONFIG.scriptUrl) { showToast('URL non configurée', 'error'); return null; }
+  try {
+    const res = await fetch(CONFIG.scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    return await res.json();
+  } catch { showToast('Erreur d\'envoi', 'error'); return null; }
+}
+
+// ═══════════════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════════════
+async function loadData() {
+  document.getElementById('cardList').innerHTML = `<div class="list-loading"><div class="spinner"></div> Chargement…</div>`;
+  const data = await apiGet({ action: 'getAll' });
+  if (!data) return;
+  allData = (data.rows || []).sort((a,b) => (b.dateRaw||'') > (a.dateRaw||'') ? 1 : -1);
+  filteredData = [...allData];
+  displayCount = 20;
+  renderCards();
+  updateStats();
+}
+
+async function refreshData() {
+  showToast('Actualisation…');
+  await loadData();
+}
+
+// ═══════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════
+let searchTimer;
+function onSearch(q) {
+  clearTimeout(searchTimer);
+  document.getElementById('searchClear').classList.toggle('visible', q.length > 0);
+  searchTimer = setTimeout(() => {
+    const term = q.toLowerCase().trim();
+    filteredData = term
+      ? allData.filter(r => [r.ref, r.c1, r.c2, r.c3, r.c4, r.c5, r.note].some(v => v && v.toLowerCase().includes(term)))
+      : [...allData];
+    displayCount = 20;
+    renderCards();
+    if (currentPage === 'stats') updateStats();
+  }, 180);
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  onSearch('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER CARDS
+// ═══════════════════════════════════════════════
+function renderCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const list = document.getElementById('cardList');
+  const total = filteredData.length;
+  const shown = filteredData.slice(0, displayCount);
+
+  document.getElementById('listMeta').textContent =
+    total > 0 ? `${total} formule${total > 1 ? 's' : ''}` : '';
+
+  if (shown.length === 0) {
+    list.innerHTML = `<div class="empty-msg">
+      <svg width="36" height="36" fill="none" stroke="var(--text-faint)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>${q ? `Aucun résultat` : 'Aucune formule'}</p>
+    </div>`;
+    document.getElementById('loadMoreBtn').style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = shown.map(r => {
+    const chips = [r.c1,r.c2,r.c3,r.c4,r.c5]
+      .filter(Boolean)
+      .map(v => `<span class="chip">${hl(v,q)}</span>`)
+      .join('');
+    return `<div class="card" data-ref="${escHtml(r.ref)}">
+      <div class="card-ref">
+        <span>${hl(r.ref,q)}</span>
+        <span class="card-date">${shortDate(r.dateStr)}</span>
+      </div>
+      ${chips ? `<div class="card-composants">${chips}</div>` : ''}
+      ${r.note ? `<div class="card-note">${hl(r.note,q)}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Click handlers
+  list.querySelectorAll('.card[data-ref]').forEach(card => {
+    card.addEventListener('click', () => openDetail(card.dataset.ref));
+  });
+
+  document.getElementById('loadMoreBtn').style.display =
+    total > displayCount ? 'block' : 'none';
+}
+
+function loadMore() {
+  displayCount += 20;
+  renderCards();
+}
+
+// ═══════════════════════════════════════════════
+//  DETAIL SHEET
+// ═══════════════════════════════════════════════
+function openDetail(ref) {
+  const r = allData.find(x => x.ref === ref);
+  if (!r) return;
+  detailRef = ref;
+
+  document.getElementById('sheetRef').textContent = r.ref;
+  document.getElementById('sheetCreated').textContent = 'Créé le ' + (r.dateStr || '—');
+
+  const fill = (id, val) => {
+    const el = document.getElementById(id);
+    if (val) { el.textContent = val; el.classList.remove('empty'); }
+    else { el.textContent = '—'; el.classList.add('empty'); }
+  };
+  fill('sC1', r.c1); fill('sC2', r.c2); fill('sC3', r.c3);
+  fill('sC4', r.c4); fill('sC5', r.c5);
+
+  const note = document.getElementById('sNote');
+  if (r.note) { note.textContent = r.note; note.classList.remove('empty'); }
+  else { note.textContent = 'Aucune note'; note.classList.add('empty'); }
+
+  document.getElementById('sDateCreation').textContent = r.dateStr || '—';
+  document.getElementById('sDateModif').textContent = cleanDate(r.modifStr);
+
+  document.getElementById('detailSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function editEntry() {
+  closeDetail();
+  const r = allData.find(x => x.ref === detailRef);
+  buildForm(r);
+  showPage('form');
+}
+
+async function deleteEntry() {
+  if (!detailRef) return;
+  if (!confirm(`Supprimer "${detailRef}" ?`)) return;
+  const res = await apiPost({ action: 'delete', ref: detailRef });
+  if (res && res.status === 'ok') {
+    showToast('Formule supprimée', 'success');
+    closeDetail();
+    await loadData();
+  } else {
+    showToast('Erreur de suppression', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  FORM
+// ═══════════════════════════════════════════════
+function buildForm(prefill) {
+  editingRef = prefill ? prefill.ref : null;
+  const isEdit = !!editingRef;
+  const fc = document.getElementById('formContent');
+
+  fc.innerHTML = `
+    <div class="form-section">
+      <div class="form-section-header">Identification</div>
+      <div class="form-field">
+        <label>Référence *</label>
+        <input type="text" id="fRef" value="${escHtml(prefill?.ref||'')}" placeholder="Ex : REF2602-AAB1" ${isEdit?'readonly':''}>
+      </div>
+      ${isEdit ? `<div class="form-field"><label>Date de création</label><input type="text" value="${escHtml(prefill?.dateStr||'')}" readonly></div>` : ''}
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-header">Composition</div>
+      <div class="form-field"><label>Composant 1</label><input type="text" id="fC1" value="${escHtml(prefill?.c1||'')}" placeholder="Ingrédient 1"></div>
+      <div class="form-field"><label>Composant 2</label><input type="text" id="fC2" value="${escHtml(prefill?.c2||'')}" placeholder="Ingrédient 2"></div>
+      <div class="form-field"><label>Composant 3</label><input type="text" id="fC3" value="${escHtml(prefill?.c3||'')}" placeholder="Ingrédient 3"></div>
+      <div class="form-field"><label>Composant 4</label><input type="text" id="fC4" value="${escHtml(prefill?.c4||'')}" placeholder="Ingrédient 4"></div>
+      <div class="form-field"><label>Composant 5</label><input type="text" id="fC5" value="${escHtml(prefill?.c5||'')}" placeholder="Ingrédient 5"></div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-header">Note & Observation</div>
+      <div class="form-field">
+        <label>Note</label>
+        <textarea id="fNote" placeholder="Commentaires, dosages…">${escHtml(prefill?.note||'')}</textarea>
+      </div>
+    </div>
+
+    <button class="form-submit" onclick="submitForm()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      ${isEdit ? 'Mettre à jour' : 'Enregistrer'}
+    </button>
+    ${isEdit ? `<button onclick="showPage('liste')" style="display:block;width:100%;padding:12px;margin-top:8px;background:none;border:none;color:var(--text-faint);font-family:'Jost',sans-serif;font-size:0.8rem;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;">Annuler</button>` : ''}
+  `;
+}
+
+async function submitForm() {
+  const ref = document.getElementById('fRef').value.trim();
+  if (!ref) { showToast('Référence obligatoire', 'error'); return; }
+
+  const payload = {
+    action: editingRef ? 'update' : 'add',
+    ref,
+    c1: document.getElementById('fC1').value.trim(),
+    c2: document.getElementById('fC2').value.trim(),
+    c3: document.getElementById('fC3').value.trim(),
+    c4: document.getElementById('fC4').value.trim(),
+    c5: document.getElementById('fC5').value.trim(),
+    note: document.getElementById('fNote').value.trim()
+  };
+
+  const btn = document.querySelector('.form-submit');
+  btn.textContent = 'Envoi…';
+  btn.disabled = true;
+
+  const res = await apiPost(payload);
+  if (res && res.status === 'ok') {
+    showToast(editingRef ? 'Mis à jour ✓' : 'Ajouté ✓', 'success');
+    editingRef = null;
+    await loadData();
+    showPage('liste');
+  } else {
+    showToast(res?.message || 'Erreur', 'error');
+    btn.textContent = editingRef ? 'Mettre à jour' : 'Enregistrer';
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════
+function updateStats() {
+  const today = new Date().toLocaleDateString('fr-FR');
+  const todayCount = allData.filter(r => r.dateStr === today).length;
+  const lastModif = allData.length
+    ? allData.reduce((a,b) => (a.modifRaw||'') > (b.modifRaw||'') ? a : b)
+    : null;
+
+  document.getElementById('sTotal').textContent = allData.length;
+  document.getElementById('sToday').textContent = todayCount;
+  document.getElementById('sFiltered').textContent = filteredData.length;
+  document.getElementById('sLast').textContent = lastModif ? cleanDate(lastModif.modifStr) : '—';
+}
+
+// ═══════════════════════════════════════════════
+//  CONFIG SHEET
+// ═══════════════════════════════════════════════
+function openConfig() { document.getElementById('configSheet').classList.add('open'); }
+function closeConfig() { document.getElementById('configSheet').classList.remove('open'); }
+
+function saveConfig() {
+  const url = document.getElementById('configUrl').value.trim();
+  CONFIG.scriptUrl = url;
+  localStorage.setItem('parfum_scriptUrl', url);
+  closeConfig();
+  showToast('Configuration sauvegardée', 'success');
+  if (url) loadData();
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function hl(text, q) {
+  if (!text) return '';
+  const escaped = escHtml(text);
+  if (!q) return escaped;
+  const eq = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(`(${eq})`, 'gi'), '<mark class="hl">$1</mark>');
+}
+
+function cleanDate(str) {
+  if (!str) return '—';
+  return str.replace(/\s+GMT[+-]\d{4}\s*\(.*\)/, '').trim();
+}
+
+function shortDate(str) {
+  if (!str) return '—';
+  const clean = cleanDate(str);
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(clean)) return clean.substring(0, 10);
+  return clean.split(' ').slice(0, 4).join(' ');
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 2500);
+}
+
+// ── Swipe to close ──
+function setupSwipeToClose(sheetId, panelClass) {
+  const sheet = document.getElementById(sheetId);
+  const panel = sheet.querySelector('.' + panelClass) || sheet.querySelector('.sheet-panel');
+  if (!panel) return;
+  let startY = 0, isDragging = false;
+  panel.addEventListener('touchstart', e => { startY = e.touches[0].clientY; isDragging = true; }, { passive: true });
+  panel.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 0) panel.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  panel.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 80) {
+      sheet.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    panel.style.transform = '';
+  });
+}
+</script>
+</body>
+</html>
