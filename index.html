@@ -934,7 +934,7 @@ body {
 
   <!-- Header -->
   <header class="app-header">
-    <div class="header-logo">Tech<span>Track</span> <span style="font-size:.8rem;font-weight:800;color:var(--accent);background:rgba(43,189,200,0.15);padding:.25rem .7rem;border-radius:8px;vertical-align:middle;letter-spacing:.04em;font-family:'Syne',sans-serif;border:1px solid rgba(43,189,200,0.3)">V3</span></div>
+    <div class="header-logo">Tech<span>Track</span> <span style="font-size:.8rem;font-weight:800;color:var(--accent);background:rgba(43,189,200,0.15);padding:.25rem .7rem;border-radius:8px;vertical-align:middle;letter-spacing:.04em;font-family:'Syne',sans-serif;border:1px solid rgba(43,189,200,0.3)">V4</span></div>
     <div class="header-tech" id="headerTech">
       <div class="header-avatar" id="headerAvatar"></div>
       <span class="header-techname" id="headerName"></span>
@@ -1637,10 +1637,10 @@ async function syncData() {
   const syncIcon = document.getElementById('syncIcon');
   if (btn)      btn.classList.add('syncing');
   if (syncIcon) syncIcon.style.display = 'none';
-  showLoading('Synchronisation avec Sheets...');
+  showLoading('Connexion au Sheet...');
 
   try {
-    const data = await fetchSheets(url);
+    const data = await fetchSheets(url, 3);
     if (data && data.data) {
       mergeSheetData(data.data);
       lastSync = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
@@ -1650,7 +1650,7 @@ async function syncData() {
     }
   } catch(e) {
     console.warn('Sync error', e);
-    toast('❌ Impossible de lire Sheets — données locales utilisées', 'error');
+    toast('❌ Sheet inaccessible après 3 tentatives — réessayez dans quelques secondes', 'error');
   } finally {
     if (btn)      btn.classList.remove('syncing');
     if (syncIcon) syncIcon.style.display = '';
@@ -1658,23 +1658,48 @@ async function syncData() {
   }
 }
 
-function fetchSheets(url) {
+// ─── FETCH AVEC RETRY AUTOMATIQUE (3 tentatives) ─────────
+async function fetchSheets(url, maxRetries = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const lsd = document.getElementById('lastSyncDisplay');
+      if (lsd) lsd.textContent = `Tentative ${attempt}/${maxRetries}...`;
+      const data = await fetchSheetsOnce(url, attempt === 1 ? 8000 : 10000);
+      return data;
+    } catch(e) {
+      lastError = e;
+      console.warn(`Tentative ${attempt}/${maxRetries} échouée :`, e.message);
+      if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, attempt * 1000));
+      }
+    }
+  }
+  throw lastError;
+}
+
+function fetchSheetsOnce(url, timeout = 8000) {
   return new Promise((resolve, reject) => {
-    const cbName = 'ttcb_' + Date.now();
+    const cbName = 'ttcb_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
     const script = document.createElement('script');
     const timer  = setTimeout(() => {
       delete window[cbName];
-      script.remove();
+      if (script.parentNode) script.remove();
       reject(new Error('Timeout'));
-    }, 8000);
+    }, timeout);
     window[cbName] = (data) => {
       clearTimeout(timer);
       delete window[cbName];
-      script.remove();
+      if (script.parentNode) script.remove();
       resolve(data);
     };
-    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-    script.onerror = () => { clearTimeout(timer); delete window[cbName]; reject(new Error('Script error')); };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName + '&_t=' + Date.now();
+    script.onerror = () => {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.remove();
+      reject(new Error('Script error'));
+    };
     document.body.appendChild(script);
   });
 }
