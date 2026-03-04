@@ -934,7 +934,7 @@ body {
 
   <!-- Header -->
   <header class="app-header">
-    <div class="header-logo">Tech<span>Track</span> <span style="font-size:.8rem;font-weight:800;color:var(--accent);background:rgba(43,189,200,0.15);padding:.25rem .7rem;border-radius:8px;vertical-align:middle;letter-spacing:.04em;font-family:'Syne',sans-serif;border:1px solid rgba(43,189,200,0.3)">V4</span></div>
+    <div class="header-logo">Tech<span>Track</span> <span style="font-size:.8rem;font-weight:800;color:var(--accent);background:rgba(43,189,200,0.15);padding:.25rem .7rem;border-radius:8px;vertical-align:middle;letter-spacing:.04em;font-family:'Syne',sans-serif;border:1px solid rgba(43,189,200,0.3)">V5</span></div>
     <div class="header-tech" id="headerTech">
       <div class="header-avatar" id="headerAvatar"></div>
       <span class="header-techname" id="headerName"></span>
@@ -1579,12 +1579,14 @@ function closeMission(id) {
   const idx = appState.missions.findIndex(x => x.id === id);
   if (idx < 0) return;
   const m = appState.missions[idx];
+  const now = new Date();
   const archived = {
     ...m,
     tech:        currentTech.id,
-    status:      'done',   // FIX: forcer 'done' au lieu de garder le statut précédent
-    pct:         100,      // FIX: forcer 100% à la clôture
-    completedAt: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
+    status:      'done',
+    pct:         100,
+    completedAt: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
+    closedDate:  now.toLocaleDateString('fr-FR'),   // ex: "04/03/2026"
   };
   appState.history.push(archived);
   appState.missions.splice(idx, 1);
@@ -1612,9 +1614,11 @@ async function syncMissionToSheets(mission) {
       priority:  mission.priority || '',
       status:    mission.status   || '',
       pct:       pctValue,
-      comment:   mission.comment  || '',
-      timestamp: new Date().toISOString(),
-      source:    'mobile'
+      comment:    mission.comment   || '',
+      end:        mission.end        || '',
+      closedDate: mission.closedDate || '',
+      timestamp:  new Date().toISOString(),
+      source:     'mobile'
     };
     await fetch(url, {
       method: 'POST',
