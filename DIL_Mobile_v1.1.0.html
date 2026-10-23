@@ -7,12 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DIL Mobile">
-<title>DIL Mobile v1.1.0</title>
+<title>DIL Mobile v1.2.0</title>
 <!--
   DIL Mobile — consultation des demandes DIL sur téléphone
-  Version : 1.1.0  (23/10/2026)
+  Version : 1.2.0  (23/10/2026)
   Données : Google Sheet « DIL Mobile » publié par SuiviDemandes v1.27.0 (bouton « Publier mobile »)
   Journal des versions
+  · 1.2.0 — e-mail plus lisible : une ligne vide entre chaque information et entre chaque
+            commentaire ; « Affectation » placée juste après la référence.
   · 1.1.0 — iPhone : l'appli peut être servie par l'Apps Script (lien /exec?k=CLÉ à ajouter à l'écran
             d'accueil, URL et clé préremplies) ; ouverture de la messagerie compatible ; confirmation
             sans fenêtre système.
@@ -98,7 +100,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 </head>
 <body>
 <header class="hdr">
-  <h1>DIL Mobile <span class="v">v1.1.0</span><small id="h-sub">Aucune donnée</small></h1>
+  <h1>DIL Mobile <span class="v">v1.2.0</span><small id="h-sub">Aucune donnée</small></h1>
   <button class="ib" id="b-sync" onclick="synchroniser()" aria-label="Actualiser">⟳</button>
   <button class="ib" onclick="ouvrirReglages()" aria-label="Réglages">⚙</button>
 </header>
@@ -161,7 +163,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 <script>/*DILM_INJECT*/</script>
 <script>
 'use strict';
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const ETATS = [['encours','En cours','bl'],['demandereouverture','Demande réouverture','ro'],['prisencompte','Pris en compte','te'],['programme','Programmé','vi']];
 const LS = { cfg:'dilm_cfg', data:'dilm_data' };
 const MAILTO_MAX = 1800;   // au-delà, certaines messageries tronquent un lien mailto
@@ -263,13 +265,18 @@ function toutSel(on) { if (on) visibles().forEach(d => SEL.add(d.ref)); else SEL
 
 /* ── E-mail ── */
 function texteDemande(d) {
-  const L = ['RÉFÉRENCE ' + d.ref + ' — ' + (d.statut || ''), 'Service demandeur : ' + (d.srvDem || 'Non renseigné'), 'Nom demandeur : ' + (d.demandeur || 'Non renseigné'),
-    'Site : ' + (d.site || 'Non renseigné'), 'Affectation : ' + (d.aff ? d.aff + (d.affType ? ' (' + d.affType + ')' : '') : 'Non affectée')];
-  if (d.dateDem) L.push('Demandée le : ' + d.dateDem);
+  // v1.2.0 : une ligne vide entre chaque information ; Affectation juste après la référence
+  const B = ['RÉFÉRENCE ' + d.ref + ' — ' + (d.statut || ''),
+    'Affectation : ' + (d.aff ? d.aff + (d.affType ? ' (' + d.affType + ')' : '') : 'Non affectée'),
+    'Service demandeur : ' + (d.srvDem || 'Non renseigné'),
+    'Nom demandeur : ' + (d.demandeur || 'Non renseigné'),
+    'Site : ' + (d.site || 'Non renseigné')];
+  if (d.dateDem) B.push('Demandée le : ' + d.dateDem);
   const O = occs(d);
-  L.push('Commentaires (' + O.length + ') :');
-  O.forEach(o => L.push('  • ' + o[0] + (o[1] ? ' — ' + o[1] : '') + (o[2] ? ' (' + o[2] + ')' : '') + ' :\n    ' + String(o[3]).trim().replace(/\n/g, '\n    ')));
-  return L.join('\n');
+  B.push('Commentaires (' + O.length + ') :');
+  O.forEach(o => B.push('  • ' + o[0] + (o[1] ? ' — ' + o[1] : '') + (o[2] ? ' (' + o[2] + ')' : '') + ' :\n'
+    + String(o[3]).replace(/\r\n?/g, '\n').split('\n').map(x => x.trim()).filter(Boolean).map(x => '    ' + x).join('\n')));
+  return B.join('\n\n');
 }
 function corps() {
   const D = MAILREFS.map(r => DATA.demandes.find(d => d.ref === r)).filter(Boolean);
